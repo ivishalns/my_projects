@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stratum — Design Prompt Framework</title>
+  <style>
+    :root{
+      --bg:#f4f5f0;
+      --bg-deep:#ecefe6;
+      --card:#ffffff;
+      --card-soft:rgba(255,255,255,.82);
+      --ink:#10110f;
+      --ink-soft:#262a24;
+      --muted:#5e655a;
+      --line:rgba(16,17,15,.10);
+      --line-strong:rgba(16,17,15,.14);
+      --green:#86BC25;
+      --green-deep:#5b8613;
+      --green-soft:#edf7d8;
+      --sky:#d9ecff;
+      --lav:#e7ddff;
+      --warm:#fff0cf;
+      --shadow:0 16px 40px rgba(16,17,15,.06);
+      --shadow-lg:0 28px 70px rgba(16,17,15,.10);
+      --radius-xxl:40px;
+      --radius-xl:32px;
+      --radius-lg:26px;
+      --radius-md:20px;
+      --radius-sm:14px;
+      --max:1280px;
+      --ease:cubic-bezier(.2,.8,.2,1);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behaviour:smooth}
+    body{
+      margin:0;
+      font-family:"Open Sans", Aptos, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color:var(--ink);
+      background:linear-gradient(180deg, #f8f9f5 0%, #f3f5ef 100%);
+      line-height:1.65;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      overflow-x:hidden;
+    }
+
+    body::before,
+    body::after{
+      content:"";
+      position:fixed;
+      inset:-12%;
+      pointer-events:none;
+      z-index:-2;
+    }
+    body::before{
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 210, 122, .28), transparent 26%),
+        radial-gradient(circle at 85% 8%, rgba(116, 197, 255, .24), transparent 22%),
+        radial-gradient(circle at 78% 56%, rgba(134,188,37,.18), transparent 18%),
+        radial-gradient(circle at 30% 75%, rgba(194, 171, 255, .18), transparent 24%);
+      animation:drift 26s ease-in-out infinite alternate;
+      filter:saturate(108%);
+    }
+    body::after{
+      background-image:
+        linear-gradient(rgba(16,17,15,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,17,15,.035) 1px, transparent 1px);
+      background-size:56px 56px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.22), transparent 74%);
+      opacity:.18;
+      z-index:-1;
+    }
+
+    a{color:inherit}
+    .shell{padding:0 32px 88px}
+    .wrap{max-width:var(--max); margin:0 auto}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:80;
+      backdrop-filter:blur(18px);
+      background:rgba(248,249,245,.75);
+      border-bottom:1px solid rgba(16,17,15,.06);
+    }
+    .topbar-inner{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:16px 32px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:0;
+      font-size:24px;
+      font-weight:800;
+      letter-spacing:normal;
+      text-transform:uppercase;
+      background:linear-gradient(90deg, var(--green) 0%, #0085AD 25%, var(--green) 50%, #0085AD 75%, var(--green) 100%);
+      background-size:300% 100%;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      animation:brandShimmer 8s ease-in-out infinite;
+    }
+    @keyframes brandShimmer{
+      0%{background-position:0% 0}
+      50%{background-position:100% 0}
+      100%{background-position:0% 0}
+    }
+    .dot{
+      width:14px;height:14px;border-radius:999px;
+      background:linear-gradient(135deg, #a0d632 0%, var(--green) 50%, var(--green-deep) 100%);
+      box-shadow:0 0 0 5px rgba(134,188,37,.10), 0 0 18px rgba(134,188,37,.28);
+      flex:none;
+    }
+    .navlinks{display:flex; flex-wrap:wrap; gap:10px}
+    .navlinks a{
+      text-decoration:none;
+      color:var(--muted);
+      padding:10px 20px;
+      border-radius:999px;
+      transition:color .6s ease, background .6s ease, border-color .6s ease;
+      border:1px solid var(--line);
+      font-size:14px;
+      background:rgba(255,255,255,.45);
+      white-space:nowrap;
+    }
+    .navlinks a:hover{
+      background:#fff;
+      color:var(--ink);
+      border-color:var(--line);
+    }
+    .navlinks a.active{
+      color:var(--green-deep);
+      border-color:rgba(134,188,37,.22);
+      background:rgba(255,255,255,.65);
+    }
+
+    .hero{padding:44px 0 0}
+    .hero-panel{
+      position:relative;
+      overflow:hidden;
+      border-radius:44px;
+      padding:48px 56px 46px;
+      color:#fff;
+      background:
+        linear-gradient(180deg, #0a0b0a 0%, #0f100d 100%);
+      border:1px solid rgba(255,255,255,.07);
+      box-shadow:0 26px 80px rgba(16,17,15,.15);
+      isolation:isolate;
+    }
+    .hero-panel::before,
+    .hero-panel::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:-1;
+    }
+    .hero-panel::before{
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px);
+      background-size:64px 64px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.42), transparent 78%);
+      opacity:.26;
+    }
+    .hero-panel::after{
+      background:
+        radial-gradient(circle at 78% 16%, rgba(134,188,37,.14), transparent 24%),
+        radial-gradient(circle at 68% 60%, rgba(134,188,37,.08), transparent 28%),
+        radial-gradient(circle at 58% 92%, rgba(160,220,60,.10), transparent 18%);
+      animation:drift 24s ease-in-out infinite alternate;
+    }
+
+    .hero-blob-wrap{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      overflow:hidden;
+    }
+    .hero-blob{
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+    }
+    /* Each blob has two layers: green (default) + blue (fades in/out via opacity) */
+    .hero-blob--main{
+      width:480px;
+      height:480px;
+      top:50%;
+      right:-2%;
+      transform:translate(0, -50%);
+      background:radial-gradient(circle at 40% 38%, rgba(200,255,120,.55) 0%, rgba(134,188,37,.44) 28%, rgba(134,188,37,.12) 56%, transparent 72%);
+      filter:blur(60px);
+    }
+    .hero-blob--main-blue{
+      width:480px;
+      height:480px;
+      top:50%;
+      right:-2%;
+      transform:translate(0, -50%);
+      background:radial-gradient(circle at 40% 38%, rgba(0,133,173,.80) 0%, rgba(0,133,173,.55) 28%, rgba(0,100,150,.20) 56%, transparent 72%);
+      filter:blur(60px);
+      opacity:0;
+      animation:blobFade 12s ease-in-out infinite alternate;
+    }
+    .hero-blob--mid{
+      width:320px;
+      height:320px;
+      top:44%;
+      right:10%;
+      transform:translate(0, -44%);
+      background:radial-gradient(circle at 55% 50%, rgba(160,230,60,.38) 0%, rgba(134,188,37,.20) 40%, transparent 70%);
+      filter:blur(50px);
+    }
+    .hero-blob--mid-blue{
+      width:320px;
+      height:320px;
+      top:44%;
+      right:10%;
+      transform:translate(0, -44%);
+      background:radial-gradient(circle at 55% 50%, rgba(0,133,173,.70) 0%, rgba(0,133,173,.40) 40%, transparent 70%);
+      filter:blur(50px);
+      opacity:0;
+      animation:blobFade 16s ease-in-out 3s infinite alternate;
+    }
+    .hero-blob--small{
+      width:160px;
+      height:160px;
+      top:16%;
+      right:22%;
+      background:radial-gradient(circle, rgba(180,240,130,.42) 0%, rgba(134,188,37,.14) 50%, transparent 72%);
+      filter:blur(38px);
+    }
+    .hero-blob--small-blue{
+      width:160px;
+      height:160px;
+      top:16%;
+      right:22%;
+      background:radial-gradient(circle, rgba(0,133,173,.65) 0%, rgba(0,150,190,.30) 50%, transparent 72%);
+      filter:blur(38px);
+      opacity:0;
+      animation:blobFade 10s ease-in-out 5s infinite alternate;
+    }
+    .hero-blob--accent{
+      width:120px;
+      height:120px;
+      bottom:14%;
+      right:6%;
+      background:radial-gradient(circle, rgba(160,220,80,.36) 0%, rgba(134,188,37,.08) 55%, transparent 75%);
+      filter:blur(40px);
+    }
+    .hero-blob--accent-blue{
+      width:120px;
+      height:120px;
+      bottom:14%;
+      right:6%;
+      background:radial-gradient(circle, rgba(0,133,173,.60) 0%, rgba(0,150,190,.25) 55%, transparent 75%);
+      filter:blur(40px);
+      opacity:0;
+      animation:blobFade 14s ease-in-out 2s infinite alternate;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      max-width:58%;
+      gap:0;
+      align-items:start;
+      position:relative;
+      z-index:1;
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:8px 16px;
+      color:#dde6d1;
+      background:rgba(255,255,255,.03);
+      font-size:13px;
+      letter-spacing:.02em;
+      margin-bottom:20px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    h1{
+      margin:0;
+      max-width:20ch;
+      font-size:clamp(2.4rem, 4.2vw, 3.8rem);
+      line-height:1.06;
+      letter-spacing:-.04em;
+      font-weight:800;
+      text-wrap:balance;
+    }
+    .hero-copy{
+      margin-top:18px;
+      max-width:72ch;
+      color:#c4cdb8;
+      font-size:1.02rem;
+      line-height:1.68;
+    }
+    .hero-actions{
+      margin-top:24px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .button{
+      appearance:none;
+      border:0;
+      border-radius:999px;
+      padding:12px 22px;
+      font:inherit;
+      font-size:.92rem;
+      font-weight:700;
+      cursor:pointer;
+      transition:all .24s var(--ease);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+    }
+    .button.primary{
+      background:linear-gradient(135deg, #9ad133 0%, var(--green) 54%, #74a61d 100%);
+      color:#10110f;
+      box-shadow:0 16px 38px rgba(134,188,37,.30);
+    }
+    .button.primary:hover{transform:translateY(-2px); box-shadow:0 22px 42px rgba(134,188,37,.34)}
+    .button.secondary{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(10px);
+    }
+    .button.secondary:hover{
+      background:rgba(255,255,255,.10);
+      transform:translateY(-2px);
+    }
+
+
+
+    section{padding-top:88px}
+    .section-surface{
+      position:relative;
+      overflow:hidden;
+      border-radius:38px;
+      padding:42px 42px 44px;
+      background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(252,253,248,.92));
+      border:1px solid rgba(16,17,15,.07);
+      box-shadow:var(--shadow-lg);
+      isolation:isolate;
+    }
+    .section-surface::before,
+    .section-surface::after{
+      content:"";
+      position:absolute;
+      pointer-events:none;
+      z-index:-1;
+    }
+    .section-surface::before{
+      inset:auto -40px -80px auto;
+      width:360px;
+      height:360px;
+      background:
+        radial-gradient(circle, rgba(134,188,37,.10), transparent 44%),
+        radial-gradient(circle at 30% 30%, rgba(151,219,255,.14), transparent 40%),
+        radial-gradient(circle at 70% 50%, rgba(255,224,167,.14), transparent 40%);
+      filter:blur(6px);
+      animation:drift 20s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+    .section-surface::after{
+      inset:0;
+      background-image:
+        linear-gradient(rgba(16,17,15,.030) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,17,15,.030) 1px, transparent 1px);
+      background-size:34px 34px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.16), transparent 70%);
+      opacity:.22;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:24px;
+      margin-bottom:28px;
+    }
+    .section-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      color:var(--green-deep);
+      font-weight:700;
+      text-transform:uppercase;
+      font-size:11px;
+      letter-spacing:.14em;
+      margin-bottom:10px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(134,188,37,.10);
+      border:1px solid rgba(134,188,37,.16);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+    }
+    .section-kicker::before{
+      content:"";
+      width:8px;height:8px;border-radius:999px;background:var(--green);
+      box-shadow:0 0 0 6px rgba(134,188,37,.10);
+    }
+    h2{
+      margin:0;
+      font-size:clamp(1.8rem, 2.6vw, 2.6rem);
+      letter-spacing:-.035em;
+      line-height:1.14;
+      max-width:28ch;
+      text-wrap:balance;
+      font-weight:800;
+    }
+    .section-copy{
+      max-width:60ch;
+      color:var(--muted);
+      margin-top:12px;
+      font-size:.97rem;
+      line-height:1.68;
+    }
+
+    .grid-3,
+    .grid-2,
+    .complexity-grid{
+      display:grid;
+      gap:24px;
+    }
+    .grid-3{grid-template-columns:repeat(3, minmax(0,1fr))}
+    .grid-2{grid-template-columns:repeat(2, minmax(0,1fr))}
+    .complexity-grid{grid-template-columns:repeat(3, minmax(0,1fr))}
+
+    .card{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.90));
+      border:1px solid rgba(16,17,15,.08);
+      border-radius:30px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      transition:transform .24s var(--ease), box-shadow .24s var(--ease), border-color .24s var(--ease);
+      isolation:isolate;
+    }
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:auto -50px -50px auto;
+      width:180px;
+      height:180px;
+      background:radial-gradient(circle, rgba(134,188,37,.10), transparent 70%);
+      opacity:0;
+      transition:opacity .24s var(--ease);
+      z-index:-1;
+    }
+    .card:hover{
+      transform:translateY(-4px);
+      border-color:rgba(134,188,37,.24);
+      box-shadow:0 24px 48px rgba(16,17,15,.08);
+    }
+    .card:hover::after{opacity:1}
+    .card .small{
+      color:var(--green-deep);
+      font-weight:700;
+      letter-spacing:.12em;
+      font-size:11px;
+      text-transform:uppercase;
+      margin-bottom:12px;
+    }
+    .card h3{
+      margin:0 0 10px;
+      font-size:1.18rem;
+      letter-spacing:-.025em;
+      line-height:1.22;
+      text-wrap:balance;
+    }
+    .card p{margin:0; color:var(--muted); font-size:.94rem; line-height:1.62}
+
+    .layer-card{
+      display:grid;
+      gap:14px;
+      min-height:272px;
+      padding-top:30px;
+    }
+    .layer-card::before{
+      content:attr(data-num);
+      position:absolute;
+      top:14px;
+      right:18px;
+      font-size:3.4rem;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:-.06em;
+      color:rgba(16,17,15,.04);
+      pointer-events:none;
+    }
+    .layer-card .num{
+      color:var(--green-deep);
+      font-weight:800;
+      letter-spacing:.13em;
+      font-size:11px;
+      text-transform:uppercase;
+    }
+    .layer-card .starter{
+      padding:14px 16px;
+      border-radius:16px;
+      background:linear-gradient(135deg, rgba(134,188,37,.10), rgba(255,255,255,.75));
+      color:#253118;
+      font-size:13.5px;
+      border:1px solid rgba(134,188,37,.16);
+      margin-top:auto;
+      line-height:1.58;
+    }
+
+    .benefit-card{
+      min-height:220px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(253,253,250,.92));
+    }
+
+    .complexity-break{padding-top:72px; padding-bottom:0}
+
+    .complexity-surface{
+      position:relative;
+      overflow:hidden;
+      border-radius:38px;
+      padding:48px 42px 52px;
+      background:linear-gradient(170deg, #131914 0%, #0f1210 54%, #111510 100%);
+      border:1px solid rgba(134,188,37,.10);
+      box-shadow:0 28px 72px rgba(16,17,15,.18);
+      color:#fff;
+      isolation:isolate;
+    }
+    .complexity-surface::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(134,188,37,.08), transparent 30%),
+        radial-gradient(circle at 82% 78%, rgba(134,188,37,.06), transparent 26%);
+    }
+    .complexity-surface::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+      background-size:52px 52px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.30), transparent 72%);
+      opacity:.3;
+    }
+    .complexity-kicker{
+      background:rgba(134,188,37,.12);
+      border-color:rgba(134,188,37,.22);
+      color:#b4d970;
+    }
+    .complexity-kicker::before{
+      background:#86BC25;
+      box-shadow:0 0 0 5px rgba(134,188,37,.18);
+    }
+    .complexity-h2{color:#fff}
+    .complexity-copy{color:rgba(255,255,255,.68)}
+
+    .complexity-card{
+      position:relative;
+      overflow:hidden;
+      padding:30px 28px 30px;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:24px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 12px 32px rgba(0,0,0,.22);
+      backdrop-filter:blur(16px);
+      min-height:0;
+      isolation:isolate;
+      transition:transform .22s var(--ease), border-color .22s var(--ease);
+    }
+    .complexity-card:hover{
+      transform:translateY(-3px);
+      border-color:rgba(134,188,37,.22);
+    }
+    .complexity-card::before{
+      content:attr(data-ghost);
+      position:absolute;
+      top:16px;
+      right:18px;
+      font-size:3.2rem;
+      line-height:1;
+      font-weight:700;
+      color:rgba(255,255,255,.06);
+      letter-spacing:-.08em;
+    }
+    .complexity-card::after{display:none}
+    .complexity-card .small{color:#b4d970; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:4px}
+    .complexity-card h3{margin:0 0 14px; font-size:1.22rem; letter-spacing:-.02em; line-height:1.18; color:#fff; font-weight:800}
+    .complexity-card p{margin:0; color:rgba(255,255,255,.78); font-size:.93rem; line-height:1.64}
+    .complexity-card .focus{
+      margin-top:18px;
+      padding-top:16px;
+      border-top:1px solid rgba(255,255,255,.10);
+      color:rgba(255,255,255,.72);
+      font-size:13.5px;
+      line-height:1.62;
+      max-width:none;
+    }
+    .complexity-card .focus strong{color:#fff; font-weight:700}
+
+    .prompt-area{
+      position:relative;
+      border-radius:40px;
+      padding:42px;
+      background:linear-gradient(180deg, rgba(255,255,255,.93), rgba(252,253,249,.92));
+      border:1px solid rgba(16,17,15,.07);
+      box-shadow:var(--shadow-lg);
+    }
+    .prompt-area::before,
+    .prompt-area::after{
+      content:"";
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+      border-radius:inherit;
+      overflow:hidden;
+    }
+    .prompt-area::before{
+      width:320px;
+      height:320px;
+      top:-80px;
+      right:-80px;
+      background:radial-gradient(circle, rgba(134,188,37,.13), transparent 60%);
+      filter:blur(8px);
+      animation:drift 20s ease-in-out infinite alternate;
+      clip-path:inset(0 0 0 0 round 40px);
+    }
+    .prompt-area::after{
+      inset:0;
+      background-image:
+        linear-gradient(rgba(16,17,15,.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,17,15,.024) 1px, transparent 1px);
+      background-size:32px 32px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.16), transparent 65%);
+      opacity:.22;
+    }
+
+    /* ── Prompt nav: two-tier hierarchy ── */
+    .prompt-nav{
+      position:sticky;
+      top:72px;
+      z-index:10;
+      margin-bottom:32px;
+      padding-top:16px;
+      padding-bottom:36px;
+      margin-top:-16px;
+      background:linear-gradient(180deg, rgba(252,253,249,.98) 78%, rgba(252,253,249,0) 100%);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+    }
+
+    /* Tier 1 – Complexity: primary selection */
+    .nav-primary{
+      display:flex;
+      gap:10px;
+      margin-bottom:0;
+    }
+    .nav-primary-btn{
+      appearance:none;
+      flex:1;
+      position:relative;
+      border:1px solid rgba(16,17,15,.08);
+      background:rgba(255,255,255,.60);
+      border-radius:20px 20px 0 0;
+      padding:18px 20px 14px;
+      font:inherit;
+      cursor:pointer;
+      transition:all .22s var(--ease);
+      text-align:left;
+      display:grid;
+      gap:2px;
+    }
+    .nav-primary-btn .nav-label{
+      font-size:.78rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      color:var(--muted);
+    }
+    .nav-primary-btn .nav-title{
+      font-size:1.05rem;
+      font-weight:700;
+      color:var(--ink-soft);
+      letter-spacing:-.02em;
+    }
+    .nav-primary-btn:hover{
+      background:rgba(255,255,255,.85);
+      border-color:rgba(16,17,15,.12);
+    }
+    .nav-primary-btn[aria-pressed="true"]{
+      background:#fff;
+      border-color:rgba(16,17,15,.10);
+      border-bottom-color:transparent;
+      box-shadow:0 -6px 24px rgba(16,17,15,.10), 0 -2px 8px rgba(16,17,15,.06);
+      z-index:2;
+    }
+    .nav-primary-btn[aria-pressed="true"] .nav-label{color:var(--green-deep)}
+    .nav-primary-btn[aria-pressed="true"] .nav-title{color:var(--ink)}
+
+    /* Tier 2 – Platform + Actions bar */
+    .nav-bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:0 12px;
+      background:#fff;
+      border:1px solid rgba(16,17,15,.10);
+      border-top:0;
+      border-radius:0 0 20px 20px;
+      padding:12px 16px 10px;
+      margin-top:-1px;
+      position:relative;
+      z-index:1;
+    }
+    .nav-secondary{
+      flex:1 1 100%;
+      padding-bottom:10px;
+      display:flex;
+      gap:2px;
+    }
+    .nav-sec-btn{
+      appearance:none;
+      border:0;
+      background:transparent;
+      border-radius:10px;
+      padding:7px 14px;
+      font:inherit;
+      font-size:.86rem;
+      font-weight:600;
+      color:var(--muted);
+      cursor:pointer;
+      transition:all .18s var(--ease);
+      position:relative;
+    }
+    .nav-sec-btn:hover{color:var(--ink-soft); background:rgba(16,17,15,.03)}
+    .nav-sec-btn[aria-pressed="true"]{
+      color:#4a6d0a;
+      background:rgba(134,188,37,.22);
+      font-weight:700;
+      box-shadow:0 1px 4px rgba(134,188,37,.18);
+    }
+
+    /* Tier 3 – Utility actions */
+    .nav-actions{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      flex:1 1 100%;
+      padding-top:8px;
+      border-top:1px solid rgba(16,17,15,.08);
+    }
+    .nav-act{
+      appearance:none;
+      border:0;
+      background:transparent;
+      padding:6px 10px;
+      font:inherit;
+      font-size:.78rem;
+      color:var(--muted);
+      cursor:pointer;
+      border-radius:8px;
+      transition:all .18s var(--ease);
+      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+    }
+    .nav-act svg{width:14px; height:14px; flex:none; opacity:.55}
+    .nav-act:hover{color:var(--ink); background:rgba(16,17,15,.04)}
+    .nav-act:hover svg{opacity:.85}
+    .nav-act-sep{
+      width:1px;
+      height:14px;
+      background:rgba(16,17,15,.10);
+      margin:0 4px;
+      flex:none;
+    }
+
+    .prompt-shell{
+      display:grid;
+      grid-template-columns:minmax(320px, .9fr) minmax(0, 1.18fr);
+      gap:32px;
+      align-items:start;
+      position:relative;
+      z-index:1;
+    }
+    .sticky-panel{
+      position:sticky;
+      top:var(--sticky-top, 320px);
+      display:grid;
+      gap:18px;
+    }
+    .meta-card{
+      padding:32px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,252,245,.96));
+      border:1.5px solid rgba(16,17,15,.13);
+      box-shadow:0 16px 40px rgba(16,17,15,.08);
+    }
+    .meta-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background:
+        linear-gradient(130deg, rgba(255,255,255,.0) 0%, rgba(255,255,255,.4) 38%, rgba(255,255,255,0) 62%),
+        linear-gradient(180deg, rgba(255,255,255,.15), transparent 32%);
+      pointer-events:none;
+    }
+    .meta-card::after{
+      content:"";
+      position:absolute;
+      inset:auto -30px -40px auto;
+      width:170px;
+      height:170px;
+      background:radial-gradient(circle, rgba(134,188,37,.14), transparent 68%);
+      opacity:1;
+      pointer-events:none;
+    }
+    .meta-card h3{
+      margin:0 0 10px;
+      font-size:1.5rem;
+      letter-spacing:-.035em;
+      line-height:1.16;
+      text-wrap:balance;
+      max-width:22ch;
+    }
+    .meta-sub{
+      color:var(--muted);
+      margin:0 0 18px;
+      font-size:.95rem;
+      line-height:1.68;
+      max-width:40ch;
+    }
+    .kpi-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .kpi{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 13px;
+      border-radius:999px;
+      font-size:13px;
+      border:1px solid rgba(16,17,15,.08);
+      background:rgba(255,255,255,.74);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
+      color:var(--ink-soft);
+    }
+    .meta-context{
+      color:var(--muted);
+      font-size:.82rem;
+      margin:0 0 18px;
+      line-height:1.5;
+    }
+    .meta-block{
+      border-top:1px solid rgba(16,17,15,.08);
+      padding-top:18px;
+      margin-top:18px;
+    }
+    .meta-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--green-deep);
+      margin-bottom:8px;
+      font-weight:700;
+    }
+    .meta-text{color:var(--muted); margin:0}
+
+    .prompt-stage{display:grid; gap:18px}
+    .prompt-layers{display:grid; gap:18px}
+    details.layer{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(254,254,252,.93));
+      border-radius:26px;
+      border:1px solid rgba(16,17,15,.08);
+      box-shadow:var(--shadow);
+      transition:transform .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+      isolation:isolate;
+    }
+    details.layer::before{
+      content:"";
+      position:absolute;
+      left:0; top:0; bottom:0; width:5px;
+      background:linear-gradient(180deg, rgba(134,188,37,.90), rgba(151,210,255,.85));
+      opacity:.9;
+    }
+    details.layer:nth-child(2)::before{background:linear-gradient(180deg, rgba(140,195,255,.92), rgba(188,206,255,.82))}
+    details.layer:nth-child(3)::before{background:linear-gradient(180deg, rgba(190,170,255,.90), rgba(134,188,37,.70))}
+    details.layer:nth-child(4)::before{background:linear-gradient(180deg, rgba(255,224,167,.92), rgba(255,205,123,.82))}
+    details.layer:nth-child(5)::before{background:linear-gradient(180deg, rgba(151,210,255,.88), rgba(190,170,255,.78))}
+    details.layer:nth-child(6)::before{background:linear-gradient(180deg, rgba(134,188,37,.88), rgba(255,224,167,.78))}
+    details.layer:nth-child(7)::before{background:linear-gradient(180deg, rgba(190,170,255,.88), rgba(151,210,255,.78))}
+    details.layer:nth-child(8)::before{background:linear-gradient(180deg, rgba(134,188,37,.88), rgba(255,224,167,.82))}
+    details.layer[open]{
+      border-color:rgba(134,188,37,.20);
+      box-shadow:0 20px 40px rgba(16,17,15,.06);
+    }
+    details.layer:hover{transform:translateY(-1px)}
+    details.layer summary{
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:22px 24px;
+    }
+    details.layer summary::-webkit-details-marker{display:none}
+    .summary-left{display:grid; gap:6px}
+    .summary-top{display:flex; align-items:center; gap:12px; font-weight:700}
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:38px;
+      height:38px;
+      border-radius:999px;
+      background:linear-gradient(135deg, rgba(134,188,37,.10), rgba(255,255,255,.90));
+      color:var(--green-deep);
+      font-size:13px;
+      font-weight:800;
+      border:1px solid rgba(134,188,37,.14);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .summary-cue{color:var(--muted); font-size:13.5px; line-height:1.5}
+    .chev{
+      width:13px;
+      height:13px;
+      border-right:2px solid var(--muted);
+      border-bottom:2px solid var(--muted);
+      transform:rotate(45deg);
+      transition:transform .2s var(--ease);
+      margin-right:4px;
+      flex:none;
+    }
+    details[open] .chev{transform:rotate(-135deg) translateY(-1px)}
+    .layer-body{
+      padding:0 28px 24px 28px;
+      color:var(--ink-soft);
+    }
+    .layer-body ul{
+      margin:0;
+      padding-left:18px;
+      display:grid;
+      gap:12px;
+    }
+    .layer-body li::marker{color:var(--green-deep)}
+    .layer-body li{padding-left:6px; line-height:1.68; font-size:.94rem}
+
+    .fade{animation:fade .42s var(--ease)}
+    @keyframes fade{
+      from{opacity:0; transform:translateY(10px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+    @keyframes drift{
+      0%{transform:translate3d(0,0,0) scale(1)}
+      50%{transform:translate3d(2%, -2.5%, 0) scale(1.03)}
+      100%{transform:translate3d(-1.8%, 2%, 0) scale(.98)}
+    }
+    @keyframes floatOrb{
+      0%,100%{transform:translateY(0px) translateX(0px)}
+      50%{transform:translateY(8px) translateX(-10px)}
+    }
+    @keyframes blobFade{
+      0%  {opacity:0}
+      100%{opacity:1}
+    }
+
+    [data-reveal]{
+      opacity:0;
+      transform:translateY(18px);
+      transition:opacity .55s var(--ease), transform .55s var(--ease);
+    }
+    [data-reveal].shown{opacity:1; transform:translateY(0)}
+
+    footer{
+      margin-top:30px;
+      padding:22px 4px 10px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *, *::before, *::after{animation:none !important; transition:none !important; scroll-behavior:auto !important}
+    }
+
+    @media (max-width: 1180px){
+      .hero-grid,
+      .prompt-shell,
+      .grid-3,
+      .complexity-grid,
+      .grid-2{grid-template-columns:1fr}
+      .sticky-panel{position:relative; top:auto}
+      .section-head h2{max-width:24ch}
+      .hero-grid{max-width:100%}
+      .hero-blob--main{width:320px; height:320px; right:2%}
+      .hero-blob--mid{width:220px; height:220px; right:8%}
+    }
+    @media (max-width: 780px){
+      .shell{padding:0 18px 72px}
+      .topbar-inner{padding:14px 18px}
+      .navlinks{display:none}
+      .hero-panel,
+      .section-surface,
+      .prompt-area,
+      .complexity-surface{padding:30px}
+      .hero-grid{gap:28px}
+      .hero-blob--main{width:240px; height:240px; right:0; filter:blur(40px)}
+      .hero-blob--mid{width:160px; height:160px; right:4%}
+      .hero-blob--small{width:120px; height:120px}
+      .hero-blob--accent{width:100px; height:100px}
+      .prompt-shell{gap:24px}
+      .section-head{align-items:start}
+      .hero-grid{max-width:100%}
+      h1{max-width:16ch; font-size:clamp(2rem, 9vw, 3rem)}
+      .hero-copy{font-size:.95rem}
+      .nav-primary{flex-direction:column; gap:8px}
+      .prompt-nav{position:relative; top:auto; background:none; backdrop-filter:none; padding-top:0; margin-top:0}
+      .nav-primary-btn{border-radius:16px; padding:14px 18px 12px}
+      .nav-primary-btn[aria-pressed="true"]{border-radius:16px 16px 0 0; border-bottom-color:transparent}
+      .nav-bar{border-radius:0 0 16px 16px; flex-direction:column; gap:10px; padding:12px}
+      .nav-secondary{width:100%; justify-content:center}
+      .nav-actions{width:100%; justify-content:center; border-top:1px solid rgba(16,17,15,.06); padding-top:6px}
+      .button{width:100%}
+      .hero-actions{display:grid}
+    }
+    @media (max-width: 560px){
+      section{padding-top:66px}
+      .hero{padding-top:28px}
+      details.layer summary{padding:18px 18px 18px 20px}
+      .layer-body{padding:0 20px 20px}
+      .meta-card, .card, .complexity-card{padding:22px}
+      .section-surface, .prompt-area, .hero-panel, .complexity-surface{border-radius:30px}
+      .complexity-card{padding:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">STRATUM V.1</div>
+      <nav class="navlinks" aria-label="Primary">
+        <a href="#framework">Framework</a>
+        <a href="#benefits">Benefits</a>
+        <a href="#complexity">Complexity</a>
+        <a href="#prompts">Sample prompts</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="wrap">
+      <header class="hero" data-reveal>
+        <div class="hero-panel">
+          <div class="hero-blob-wrap" aria-hidden="true">
+            <span class="hero-blob hero-blob--main"></span>
+            <span class="hero-blob hero-blob--main-blue"></span>
+            <span class="hero-blob hero-blob--mid"></span>
+            <span class="hero-blob hero-blob--mid-blue"></span>
+            <span class="hero-blob hero-blob--small"></span>
+            <span class="hero-blob hero-blob--small-blue"></span>
+            <span class="hero-blob hero-blob--accent"></span>
+            <span class="hero-blob hero-blob--accent-blue"></span>
+          </div>
+          <div class="hero-grid">
+            <div>
+              <div class="eyebrow"><span class="dot" style="width:9px;height:9px;box-shadow:none"></span> For teams using AI for vibe coding and vibe designing</div>
+              <h1>A design prompt framework for AI-assisted vibe coding</h1>
+              <p class="hero-copy">Helps designers & developers write clearer prompts, shape stronger experiences, and get reliable design direction from AI.</p>
+              <div class="hero-actions">
+                <a class="button primary" href="#framework">View the framework</a>
+                <a class="button secondary" href="#prompts">Browse sample prompts</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </header>
+
+      <section id="framework" data-reveal>
+        <div class="section-surface">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Framework</div>
+              <h2>The 8-layer prompt framework</h2>
+              <p class="section-copy">The structure starts with the user and their journey, then moves through rules, content, visual direction, and feedback. That makes the prompt useful for real product design, not only for styling a screen.</p>
+            </div>
+          </div>
+          <div id="frameworkGrid" class="grid-2"></div>
+        </div>
+      </section>
+
+      <section id="benefits" data-reveal>
+        <div class="section-surface">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Benefits</div>
+              <h2>Why this helps in practice</h2>
+              <p class="section-copy">These are the practical benefits of using the framework when writing prompts for AI-assisted design work.</p>
+            </div>
+          </div>
+          <div id="benefitsGrid" class="grid-3"></div>
+        </div>
+      </section>
+
+      <section id="complexity" class="complexity-break" data-reveal>
+        <div class="complexity-surface">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker complexity-kicker">Complexity model</div>
+              <h2 class="complexity-h2">What changes as the work becomes more complex</h2>
+              <p class="section-copy complexity-copy">The biggest difference is not just the number of screens. It is how much direction the prompt needs around flow, rules, content, trust, and recovery.</p>
+            </div>
+          </div>
+          <div id="complexityGrid" class="complexity-grid"></div>
+        </div>
+      </section>
+
+      <section id="prompts" data-reveal>
+        <div class="prompt-area">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Sample prompt library</div>
+              <h2>Sample prompts across different project types</h2>
+              <p class="section-copy">Choose a complexity level and platform to see a fully structured prompt. The layered view keeps each section readable, while the copy action gives you the full prompt text in one click.</p>
+            </div>
+          </div>
+
+          <nav class="prompt-nav" aria-label="Prompt selection">
+            <div id="complexityTabs" class="nav-primary" aria-label="Project complexity"></div>
+            <div class="nav-bar">
+              <div id="platformTabs" class="nav-secondary" aria-label="Platform"></div>
+              <div class="nav-actions">
+                <button id="copyPrompt" class="nav-act" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy prompt</button>
+                <span class="nav-act-sep" aria-hidden="true"></span>
+                <button id="expandAll" class="nav-act" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>Expand all</button>
+                <button id="collapseAll" class="nav-act" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>Collapse all</button>
+              </div>
+            </div>
+          </nav>
+
+          <div class="prompt-shell">
+            <aside class="sticky-panel">
+              <div id="metaCard" class="card meta-card fade"></div>
+            </aside>
+            <div class="prompt-stage">
+              <div id="promptLayers" class="prompt-layers fade"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer data-reveal>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {"frameworkLayers": [{"num": "01", "title": "Intent & user", "covers": "Who this is for, what they need to do, and what success looks like.", "why": "It keeps the prompt anchored to a real human need instead of drifting into a generic interface.", "starter": "Design for [user type] who needs to [job to be done] in [context]. Success means [clear outcome]."}, {"num": "02", "title": "Journey & flow", "covers": "Entry points, main steps, decision points, exits, and recovery paths.", "why": "A screen can look tidy and still fail the user if the end-to-end journey is unclear.", "starter": "The journey starts at [entry point], moves through [main steps], and handles [branches, exits, retries]."}, {"num": "03", "title": "Features & rules", "covers": "Capabilities, validations, permissions, calculations, and business logic.", "why": "This is where you stop AI from inventing loose behaviour or skipping the rules that make the product real.", "starter": "Core functionality includes [features]. Validation rules are [rules]. The system should [logic] and should not allow [restrictions]."}, {"num": "04", "title": "Content & microcopy", "covers": "Labels, helper text, confirmations, errors, empty states, and tone.", "why": "Poor copy can make a polished interface feel cold, confusing, or unfinished.", "starter": "Use plain-language labels and concise helper text. Include [confirmation], [error pattern], and [empty-state guidance]."}, {"num": "05", "title": "Visual system", "covers": "Colour intent, typography feel, mood, and overall interface character.", "why": "Without this, AI usually falls back on a generic white-and-blue product look.", "starter": "The visual language should feel [mood]. Use [palette], [type style], and [reference phrase] to guide the aesthetic."}, {"num": "06", "title": "Layout & hierarchy", "covers": "Information priority, grouping, placement, spacing, and composition.", "why": "This is where you explain what matters most on the page and what should stay secondary.", "starter": "Prioritise [primary information] first. Place [elements] in [locations]. Keep [secondary details] visible but quiet."}, {"num": "07", "title": "Interaction & feedback", "covers": "Hover, focus, pressed, loading, success, failure, motion, and keyboard behaviour.", "why": "A static screen is not a usable product. Behaviour needs the same clarity as layout.", "starter": "Interactive elements must include [hover/focus/pressed] states. Show [loading], [success], and [error] clearly."}, {"num": "08", "title": "Guardrails & quality", "covers": "Accessibility, trust, performance, privacy, compliance, and explicit ‘do not’ rules.", "why": "This is where you protect the output from looking AI-generated, inaccessible, or careless.", "starter": "Do not [undesired pattern]. Ensure [accessibility], [trust cue], [performance expectation], and [quality bar]."}], "benefits": [{"title": "Clearer design direction", "text": "The framework turns a vague request into a brief that gives AI far less room to guess."}, {"title": "Stronger UX coverage", "text": "User goals, journeys, content, feedback, and accessibility are treated as part of the design brief, not late additions."}, {"title": "Fewer vague outputs", "text": "The prompt becomes specific enough to shape behaviour, not just surface-level styling."}, {"title": "Better consistency across teams", "text": "Junior and senior designers can use the same structure, while still writing to different levels of depth."}, {"title": "Fewer rounds of rework", "text": "Clearer prompts reduce the usual loop of fixing missed states, missing rules, and generic layouts."}, {"title": "Better fit for vibe coding and vibe designing", "text": "It gives AI more of the context it needs to turn ideas into usable interface direction."}], "complexityNotes": [{"title": "Simple project", "summary": "One main goal, a small set of states, and light business logic.", "focus": "Be clear about the primary action, the supporting information, and the minimum states required."}, {"title": "Medium project", "summary": "A fuller workflow with more screens, stronger content rules, and more meaningful validation.", "focus": "Add clearer flow logic, stronger messaging, and more deliberate states so the design feels complete rather than merely styled."}, {"title": "Complex project", "summary": "Multiple journeys, trust-sensitive behaviour, richer business rules, and more recovery paths.", "focus": "Spell out role-based needs, edge cases, hand-offs, trust cues, and the rules that keep the experience safe and clear."}], "examples": {"simple": {"webapp": {"title": "Leave request hub", "strapline": "A straightforward internal tool for requesting and approving annual leave.", "industry": "Professional services / people operations", "targetUser": "Employees requesting leave and line managers reviewing requests", "businessGoal": "Reduce admin effort, shorten approval turnaround, and cut email back-and-forth.", "kpis": ["Request completion rate", "Average approval turnaround time", "HR support tickets related to leave", "Manager decision time"], "why": "This is simple because the product has one clear job, a small number of screens, and limited business logic.", "prompt": [{"title": "Intent & user", "cue": "Start with the core job to be done.", "lines": ["Design a desktop-first web application for employees who need to request annual leave quickly and line managers who need a clean approval view.", "The main user goal is to submit, review, and decide on a leave request without email back-and-forth.", "Success means an employee can complete a request in under two minutes and a manager can make a decision in under one minute."]}, {"title": "Journey & flow", "cue": "Keep the path short and obvious.", "lines": ["The flow starts on a personal leave summary with one clear primary action: Request leave.", "The request journey includes date selection, leave type, optional note, and a review step before submission.", "Managers land on a compact approval queue, open a request detail view, then approve, decline, or send it back for changes.", "After any action, both people should see a clear status and next step."]}, {"title": "Features & rules", "cue": "Keep the rules light but real.", "lines": ["Show leave balance, upcoming approved leave, and simple team clash indicators for the chosen dates.", "Validate date ranges, prevent past dates, and require a reason only for special leave types.", "Managers can approve, decline with a short note, or return a request for edits.", "Do not include payroll actions, multi-level approvals, or a complex policy engine."]}, {"title": "Content & microcopy", "cue": "Use plain language throughout.", "lines": ["Use clear labels such as Request leave, Awaiting approval, Approved, and Sent back for changes.", "Helper text should explain leave balance and date rules in one sentence rather than dense policy copy.", "Decline and send-back states need short, useful explanations instead of generic warnings.", "Keep wording friendly, concise, and easy for a first-time user to understand."]}, {"title": "Visual system", "cue": "Professional, calm, and uncluttered.", "lines": ["Keep the look clean, bright, and restrained with a neutral base and small Deloitte-green highlights for key actions and states.", "Use a simple sans-serif hierarchy, strong section titles, and quiet secondary text.", "Avoid decorative gradients, oversized icons, and dashboard clutter.", "Think clear internal tool rather than consumer app."]}, {"title": "Layout & hierarchy", "cue": "Put the task first.", "lines": ["Place the leave balance summary at the top, the primary action directly beneath it, and recent requests below.", "On the manager view, show the request queue on the left and the selected request detail on the right.", "Use cards, simple tables, and inline status chips with generous spacing.", "Keep the primary action visible without forcing the user to scan past unrelated content."]}, {"title": "Interaction & feedback", "cue": "Make state changes obvious.", "lines": ["Date fields should flag conflicts as soon as a range is selected.", "Buttons need clear hover, focus, disabled, and success states.", "Show an inline confirmation after submission and a small toast after a status change.", "Support keyboard navigation across the form and manager actions."]}, {"title": "Guardrails & quality", "cue": "Avoid noise and ambiguity.", "lines": ["Do not overload the page with filters, widgets, or HR jargon.", "Never hide the approval status or rely on colour alone to explain it.", "Maintain strong contrast, visible focus states, and touch-friendly controls on responsive layouts.", "Keep the experience simple enough that a new employee can use it without help."]}]}, "mobile": {"title": "Habit tracker", "strapline": "A daily routine app designed for small wins and low-friction check-ins.", "industry": "Consumer wellness", "targetUser": "Busy professionals trying to build one or two routines they can actually keep", "businessGoal": "Increase daily engagement, improve retention, and make check-ins feel rewarding rather than demanding.", "kpis": ["Daily active users", "7-day retention", "Completed habit check-ins", "Reminder opt-in rate"], "why": "This is simple because the experience centres on one personal workflow with modest rules and limited edge cases.", "prompt": [{"title": "Intent & user", "cue": "Design around motivation, not feature count.", "lines": ["Design a mobile application for busy professionals who want to keep up one or two healthy routines without feeling judged or overwhelmed.", "The primary goal is to create, track, and complete habits in a few seconds each day.", "Success means the app feels encouraging, easy to return to, and useful even on low-motivation days."]}, {"title": "Journey & flow", "cue": "Keep the loop tight.", "lines": ["The user lands on today’s habits first, marks progress, and sees a small sense of momentum straight away.", "Creating a new habit should take a few short steps: title, frequency, reminder, and start date.", "The app should also support a quick weekly review and simple editing of an existing habit.", "Avoid deep navigation or complex planning flows."]}, {"title": "Features & rules", "cue": "Support consistency without complexity.", "lines": ["Allow daily, weekday, weekend, and custom frequency habits.", "Let users mark a habit done, skipped, or partly complete where relevant.", "Show a lightweight streak and a simple history view.", "Do not turn the experience into a gamified challenge app with leaderboards or heavy analytics."]}, {"title": "Content & microcopy", "cue": "Gentle and human.", "lines": ["Use warm, supportive language that feels encouraging rather than performative.", "Buttons and states should read clearly: Done today, Skip today, Reminder on, and Start again.", "Empty states should feel calm and motivating, not overly cheerful or childish.", "Any reset or missed-day copy should reduce guilt and support re-entry."]}, {"title": "Visual system", "cue": "Soft, minimal, and modern.", "lines": ["Use a calm neutral background, restrained green accents, soft surface depth, and simple typography.", "The design should feel light enough for daily use and not visually noisy.", "Keep icons minimal and supportive.", "Think modern wellness app with editorial clarity rather than gamified productivity app."]}, {"title": "Layout & hierarchy", "cue": "Show today first.", "lines": ["The home screen should lead with today’s habit list, each with a large, tap-friendly action.", "Secondary information such as streaks and history should sit below the current day rather than compete with it.", "Keep the navigation simple, with no more than four main destinations.", "Use spacing generously so the experience feels calm on a small screen."]}, {"title": "Interaction & feedback", "cue": "Make each action feel intentional.", "lines": ["A completed habit should respond with a subtle motion cue and a satisfying state change.", "Reminder controls need clear on and off states.", "History and progress views should animate lightly without slowing the app down.", "Focus states and touch targets must remain accessible and consistent."]}, {"title": "Guardrails & quality", "cue": "Keep it supportive, not performative.", "lines": ["Do not use shame-based language, aggressive streak loss patterns, or overly loud celebration effects.", "Keep contrast strong, type legible, and touch targets comfortably large.", "Do not hide important information inside gestures that are hard to discover.", "The app should still feel complete even when the user only tracks one habit."]}]}, "website": {"title": "Neighbourhood dental clinic website", "strapline": "A small, reassuring website for patients booking or preparing for an appointment.", "industry": "Healthcare", "targetUser": "New and returning patients, often visiting on mobile while comparing clinics", "businessGoal": "Increase appointment requests, reduce uncertainty, and make the clinic feel trustworthy.", "kpis": ["Appointment enquiry conversion", "Call-to-book rate", "Bounce rate on service pages", "Mobile task completion"], "why": "This is simple because it is a lightweight informational website with a small set of user actions and clear content priorities.", "prompt": [{"title": "Intent & user", "cue": "Lead with trust and clarity.", "lines": ["Design a responsive website for a neighbourhood dental clinic aimed at patients who want to understand services, see practical details, and book an appointment with confidence.", "The main goals are to build trust quickly, answer common questions, and make contacting the clinic easy.", "Success means a first-time visitor can understand the offer and take the next step without uncertainty."]}, {"title": "Journey & flow", "cue": "Keep the site easy to scan.", "lines": ["The main journey starts on the homepage, then moves to services, dentist profiles, fees or insurance information, and contact or booking.", "Visitors should be able to reach opening hours, address, parking details, and emergency contact information within a few taps.", "The mobile experience should keep booking and contact actions visible and easy to reach.", "Avoid long, hidden content paths."]}, {"title": "Features & rules", "cue": "Keep the content practical.", "lines": ["Include homepage overview, services, clinician profiles, patient information, testimonials if used carefully, and contact or booking details.", "Support an appointment request form, a click-to-call action, and map or travel information.", "Show honest service information and realistic expectations rather than sales-heavy claims.", "Do not add complex portals or unnecessary interactive widgets."]}, {"title": "Content & microcopy", "cue": "Warm, reassuring, plain English.", "lines": ["Write in a calm and accessible tone that avoids medical jargon where possible.", "Service descriptions should explain what the treatment is, who it is for, and what to expect next.", "Form labels should be simple and welcoming.", "Error and confirmation copy should reduce anxiety and be easy to understand."]}, {"title": "Visual system", "cue": "Clinical but not cold.", "lines": ["Use a restrained palette with white and soft neutral surfaces, supported by black text and small Deloitte-green accents for important actions.", "The design should feel trustworthy, tidy, and human rather than glossy.", "Photography or illustration should feel authentic and calm.", "Avoid loud gradients, excessive icons, or anything that feels overly corporate."]}, {"title": "Layout & hierarchy", "cue": "Answer key questions fast.", "lines": ["The homepage should lead with a clear introduction, key services, trust signals, and a visible appointment action.", "Place address, hours, and contact details in a clearly recognisable block.", "Service pages should balance scannable summaries with practical detail.", "Keep paragraphs short, spacing generous, and mobile navigation straightforward."]}, {"title": "Interaction & feedback", "cue": "Small cues, no drama.", "lines": ["Navigation should feel responsive and predictable, with clear focus and active states.", "The appointment request form should validate gently and confirm submission clearly.", "Contact actions should work well on mobile, especially tap-to-call.", "Use subtle transitions only where they help orientation."]}, {"title": "Guardrails & quality", "cue": "Protect trust and accessibility.", "lines": ["Do not use sensational health claims, cluttered banners, or hard-sell language.", "Keep readability high, contrast strong, and all form fields clearly labelled.", "Make sure people can complete key actions without relying on motion, colour, or tiny text.", "The site should feel calm, credible, and easy to use for people of different ages."]}]}}, "medium": {"webapp": {"title": "Clinic scheduling and intake workspace", "strapline": "A staff-facing healthcare tool for booking, checking in, and managing patient visits.", "industry": "Healthcare operations", "targetUser": "Reception staff and clinic coordinators managing daily appointments", "businessGoal": "Reduce booking errors, shorten check-in time, lower no-show rates, and improve staff efficiency.", "kpis": ["Booking completion time", "No-show rate", "Check-in time per patient", "Scheduling error rate"], "why": "This is medium complexity because the workflow spans several screens, has meaningful validation rules, and includes more operational states.", "prompt": [{"title": "Intent & user", "cue": "Design around the staff member’s working day.", "lines": ["Design a responsive web application for reception staff and clinic coordinators who need to manage a live appointment diary, book new visits, and complete check-in tasks without losing track of the day’s schedule.", "The product should support speed, confidence, and low cognitive load during busy periods.", "Success means staff can create or amend appointments quickly, surface missing intake details early, and keep the clinic running on time."]}, {"title": "Journey & flow", "cue": "Show the operational flow, not just the screens.", "lines": ["The main journey starts on a daily schedule view, where staff can scan clinician availability, search for a patient, and create or move appointments.", "A booking flow should include patient search or creation, appointment type, clinician, date and time, confirmation, and any pre-visit steps such as forms or reminders.", "A check-in flow should surface arrival status, consent or intake completion, missing details, and a clear hand-off to the clinician.", "The system should also support rescheduling, cancellation, and waitlist fulfilment without losing context."]}, {"title": "Features & rules", "cue": "Make the logic explicit.", "lines": ["Support multiple appointment types with different durations, clinicians, and preparation requirements.", "Prevent double-booking unless an authorised override is used.", "Flag missing patient information, incomplete pre-visit forms, and obvious schedule clashes.", "Support search by patient name, date of birth, or phone number, while keeping duplicate records visible but controlled.", "Allow rescheduling and cancellation with clear reasons and an audit-friendly status history.", "Do not add billing, prescribing, or deep clinical documentation into this product."]}, {"title": "Content & microcopy", "cue": "Separate staff language from patient language.", "lines": ["Use concise operational labels that help staff scan quickly, such as Checked in, Intake missing, Running late, and Needs confirmation.", "Patient-facing messages, including reminders and confirmations, should be warmer, clearer, and free from internal shorthand.", "Warnings should tell staff what is wrong and what to do next, not just that something failed.", "Cancellation, reschedule, and waitlist copy should be calm and practical."]}, {"title": "Visual system", "cue": "Efficient, readable, and calm under pressure.", "lines": ["Use a light workspace with black text, layered white surfaces, and restrained Deloitte-green highlights for primary actions or positive statuses.", "Introduce a broader neutral system for tables, schedules, and side panels, with colour used sparingly so the interface stays readable.", "Typography should support dense information without feeling cramped, using a clean sans-serif with strong hierarchy.", "The aesthetic should feel precise, human, and operational rather than clinical in a cold or sterile way."]}, {"title": "Layout & hierarchy", "cue": "Support quick scanning and side-by-side context.", "lines": ["Use the schedule as the dominant view, with filters and clinician controls kept compact and secondary.", "Place patient detail and booking forms in a side panel or structured workspace that preserves context rather than forcing a full page switch when possible.", "Important exceptions such as clashes, missing intake, and late arrivals should be visible near the appointment they affect.", "Tables, status tags, and timeline views should feel orderly and spacious enough to scan at speed."]}, {"title": "Interaction & feedback", "cue": "The tool must feel dependable in real time.", "lines": ["Schedule interactions should support quick selection, drag-to-reschedule where appropriate, and immediate conflict feedback.", "Form validation should appear inline and early, especially around clinician availability and patient identity.", "Status changes such as check-in, cancellation, or waitlist moves should confirm clearly without interrupting the user’s flow.", "Keyboard support matters for search, tabbing through forms, and moving quickly through repeated tasks.", "Use motion lightly, mostly to preserve orientation when panels open, close, or update."]}, {"title": "Guardrails & quality", "cue": "Protect clarity, privacy, and pace.", "lines": ["Do not make the interface feel like a generic calendar app with clinical stickers on top.", "Keep private patient information visible only where needed and avoid overly dense panels.", "Never rely on colour alone to signal risk, urgency, or completion.", "Maintain strong accessibility, especially around type size, keyboard flow, focus states, and contrast in dense data views.", "The workspace should feel stable and trustworthy during busy front-desk use."]}]}, "mobile": {"title": "Grocery loyalty and basket planner app", "strapline": "A weekly shopping companion for households trying to save time and spend more deliberately.", "industry": "Retail", "targetUser": "Time-poor adults planning family food shops on mobile", "businessGoal": "Increase repeat purchase, coupon redemption, and average basket size while making weekly shopping easier.", "kpis": ["Weekly active users", "Coupon redemption rate", "Average basket size", "Repeat purchase rate"], "why": "This is medium complexity because the app combines planning, shopping, offers, and account behaviour into one connected experience.", "prompt": [{"title": "Intent & user", "cue": "Focus on real shopping stress.", "lines": ["Design a mobile application for adults who manage a weekly grocery shop and want help planning meals, tracking offers, and shopping more efficiently.", "The app should reduce decision fatigue and make saving money feel simple rather than fiddly.", "Success means users can plan a basket, apply relevant offers, and move into purchase or in-store shopping without friction."]}, {"title": "Journey & flow", "cue": "Connect planning to action.", "lines": ["The main journey starts with a home view that balances current offers, saved lists, and a quick route back to the basket.", "Users should be able to build a list from previous purchases, browse relevant offers, add items, and switch smoothly into checkout or store mode.", "A secondary flow should support household planning, including favourites, repeat buys, and a lightweight meal-planning cue.", "The app should also handle out-of-stock substitutions, removed items, and offer expiry in a way that feels understandable."]}, {"title": "Features & rules", "cue": "Spell out the retail logic.", "lines": ["Support account sign-in, saved loyalty card, personalised offers, favourites, basket management, and purchase history.", "Show whether an offer has been applied, whether a product qualifies, and when it expires.", "Allow users to save multiple lists, add from history, and receive sensible substitutions where shopping is fulfilled digitally.", "Support clear quantity controls, pricing summaries, and stock messaging.", "Do not add social feed behaviour, recipe overload, or game-like reward mechanics."]}, {"title": "Content & microcopy", "cue": "Keep price and offer language unambiguous.", "lines": ["Use clear pricing, quantity, and saving language that can be understood at a glance.", "Offer messaging should explain what applies and why, especially where there are thresholds or loyalty-only savings.", "Empty, unavailable, and substitution states should be practical rather than apologetic.", "The tone should feel helpful and grounded, not sales-heavy."]}, {"title": "Visual system", "cue": "Modern retail, not promotional clutter.", "lines": ["Use a clean, mobile-first visual language with strong product readability, clear surfaces, and restrained green highlights for savings or confirmation.", "Photography and product cards should feel tidy and consistent.", "Avoid bright promotional overload, flashing discount treatment, or too many competing accents.", "The design should feel like a useful shopping companion rather than an advertising flyer."]}, {"title": "Layout & hierarchy", "cue": "Balance discovery and control.", "lines": ["The home screen should prioritise the user’s current shopping intent, not generic promotions.", "Basket, offers, and list-building actions should stay easy to reach across the app.", "Product cards need clear hierarchy for name, price, unit detail, offer status, and add action.", "Use bottom navigation sparingly and keep screens focused enough to reduce decision fatigue."]}, {"title": "Interaction & feedback", "cue": "Shopping actions should feel immediate.", "lines": ["Adding an item should feel fast and visible, with a clear update to the basket state.", "Offer activation, substitutions, and list actions should confirm instantly.", "Loading states need to feel calm and stable, especially when searching or opening categories.", "Touch targets should be generous and cart interactions should not rely on tiny icons or hidden gestures."]}, {"title": "Guardrails & quality", "cue": "Protect clarity and trust around money.", "lines": ["Do not bury final cost, savings, or quantity changes behind extra taps.", "Avoid noisy promotional design that competes with core shopping tasks.", "Keep accessibility strong for colour contrast, dynamic text scaling, and one-handed use.", "The app should feel helpful for both planned shops and quick top-up trips."]}]}, "website": {"title": "Retail banking account opening site", "strapline": "A product discovery and application journey for new-to-bank customers.", "industry": "Financial services", "targetUser": "Prospective retail banking customers comparing products and opening a new account online", "businessGoal": "Increase qualified applications, reduce abandonment, and make the bank feel trustworthy and clear.", "kpis": ["Application start-to-complete rate", "Drop-off by step", "Product comparison engagement", "Save-and-return completion rate"], "why": "This is medium complexity because it combines exploration, comparison, eligibility, and form-heavy application steps.", "prompt": [{"title": "Intent & user", "cue": "Design for uncertainty and reassurance.", "lines": ["Design a responsive website for people comparing current accounts and savings products, then opening an account online for the first time.", "The experience should help users understand the product quickly, decide with confidence, and complete the application without feeling overwhelmed.", "Success means the site earns trust early, answers common questions clearly, and supports more completed applications."]}, {"title": "Journey & flow", "cue": "Support both browsing and committing.", "lines": ["The user should be able to move from homepage to product overview, product comparison, eligibility information, and a guided application flow.", "The application journey should be broken into calm, manageable steps with visible progress, clear save-and-return options, and obvious help points.", "Include routes for users who are not ready to apply, including comparison tools, FAQs, and branch or support contact options.", "Recovery paths for paused, failed, or incomplete applications must be clearly handled."]}, {"title": "Features & rules", "cue": "Banking rules must be visible, not implied.", "lines": ["Support product comparison, fee and rate visibility, eligibility cues, document guidance, and a multi-step digital application.", "Validate identity, address, and contact fields carefully, with specific feedback rather than generic failure messages.", "Allow users to save progress and return later without losing context.", "Surface product requirements such as age, residency, and identification needs before the user invests time in a full application.", "Do not overload the site with unrelated marketing journeys, upsell banners, or hidden fees."]}, {"title": "Content & microcopy", "cue": "Plain English matters even more in banking.", "lines": ["Use direct, plain language for product explanations, fee details, and eligibility rules.", "Step labels and form guidance should explain what is needed and why, especially for identity and address information.", "Errors should be specific, calm, and easy to resolve.", "Any reassurance copy should feel informative, not overly promotional."]}, {"title": "Visual system", "cue": "Trust first, polish second.", "lines": ["Use a restrained visual system with strong black text, generous white space, layered neutral surfaces, and carefully placed Deloitte-green accents for primary actions or progress cues.", "The interface should feel serious, modern, and calm, not flashy.", "Illustration or imagery should support clarity and trust rather than aspiration-heavy marketing.", "The design should signal financial confidence without becoming cold or formal."]}, {"title": "Layout & hierarchy", "cue": "Make key decisions feel manageable.", "lines": ["Place product value, eligibility, and account basics high on the page before deeper detail.", "Comparison views should be easy to scan, with the most important differences surfaced first.", "Application steps need a clear progress pattern, calm step titles, and enough room for form guidance without clutter.", "Supportive content such as FAQs, security reassurance, and help routes should stay visible but secondary."]}, {"title": "Interaction & feedback", "cue": "Reduce anxiety through feedback.", "lines": ["Buttons, form fields, and progress indicators need clear focus, active, disabled, and completion states.", "Inline validation should appear at the right moment, particularly in identity-heavy steps.", "If the user saves progress, confirm what has been saved and what still needs attention.", "Loading or verification states should explain what is happening and how long the user should expect to wait."]}, {"title": "Guardrails & quality", "cue": "Avoid generic marketing-site habits.", "lines": ["Do not bury important fees, terms, or product conditions inside small print or collapsed sections.", "Keep accessibility high across tables, forms, comparisons, and progress patterns.", "Never rely on colour alone for validation or completion status.", "The site should feel as clear on mobile as it does on desktop, especially during application steps."]}]}}, "complex": {"webapp": {"title": "Retail banking servicing workspace", "strapline": "A bank adviser console for handling customer service, risk-sensitive actions, and case follow-up.", "industry": "Financial services", "targetUser": "Contact-centre advisers and branch support teams serving existing retail banking customers", "businessGoal": "Increase first-contact resolution, reduce average handling time, improve compliance confidence, and shift more servicing tasks into digital channels.", "kpis": ["First-contact resolution", "Average handling time", "Case rework rate", "Quality and compliance score"], "why": "This is complex because it combines role-based information, service actions, audit needs, exceptions, and trust-sensitive decisions in one operational workspace.", "prompt": [{"title": "Intent & user", "cue": "Design for staff working under pressure with real customer consequences.", "lines": ["Design a desktop-first web application for retail banking advisers who need to understand a customer’s current situation quickly, complete servicing actions safely, and keep a clear record of what happened.", "The workspace must help advisers move between customer identity, account context, recent interactions, and action flows without losing confidence or missing a risk cue.", "Success means advisers can resolve common issues in one sitting, with fewer hand-offs and less cognitive strain."]}, {"title": "Journey & flow", "cue": "Map the working session, not just the page.", "lines": ["A typical journey starts with authenticated access, customer search, identity confirmation, and a customer overview that surfaces accounts, alerts, and recent contact history.", "From there, advisers should be able to move into common servicing tasks such as card freeze and unfreeze, address update, fee refund request, payment issue review, dispute intake, or secure follow-up note creation.", "Each action flow should preserve context, show what is needed before the action can proceed, and end with a clear outcome, reference number, and next step.", "The workspace should also support paused work, escalations, and hand-offs without forcing advisers to duplicate notes."]}, {"title": "Features & rules", "cue": "Make permissions and compliance visible.", "lines": ["Support customer search, profile overview, account summary, recent transactions, case timeline, notes, and guided servicing actions.", "Different actions should respect permissions, for example allowing some staff to collect information while only certain roles can complete monetary adjustments or account-critical changes.", "Sensitive actions must require explicit confirmation and show policy guidance where needed.", "Disputes, fraud-related issues, and address changes should capture structured information, not only free text.", "Every important action needs a visible audit trail with who did what and when.", "Do not turn the product into a data-dense legacy cockpit with every control visible at once."]}, {"title": "Content & microcopy", "cue": "Operational language must still feel human and precise.", "lines": ["Use concise labels that help advisers scan quickly, but keep wording plain enough that new team members can still understand the interface.", "Task flows should explain why a step is needed, especially where policy, risk, or identity checks apply.", "Warnings must be specific: say what blocks the action, what has been confirmed, and what still needs attention.", "Customer-facing notes and adviser-only notes should be clearly separated by tone and visibility."]}, {"title": "Visual system", "cue": "Serious, orderly, and confidence-building.", "lines": ["Use a dark-on-light operational workspace with strong typography, disciplined spacing, and Deloitte-green reserved for primary actions, confirmed states, or guided emphasis.", "Introduce a strong neutral system for dense account information, timelines, and side panels so the interface stays readable through long sessions.", "The visual character should feel premium, calm, and trustworthy rather than flashy.", "Use icons sparingly and only where they improve scanning or recognition."]}, {"title": "Layout & hierarchy", "cue": "Support scanning, decision-making, and continuity.", "lines": ["Make the customer overview the anchor of the workspace, with identity, account status, risk flags, and recent activity visible near the top.", "Use a multi-panel layout that keeps the customer context persistent while task flows open in a main work area or structured side panel.", "Alerts and risk markers should be visible but controlled, never overwhelming the entire screen.", "The case timeline, notes, and action outcomes should sit in a place that supports hand-offs and later review.", "Dense information views need strong spacing, calm grouping, and clear visual hierarchy so advisers can scan under pressure."]}, {"title": "Interaction & feedback", "cue": "Behaviour must reduce risk, not add it.", "lines": ["Search needs fast results, keyboard support, and a clear distinction between similar customer records.", "Task flows should autosave structured progress where appropriate, while still making explicit when an action is not yet complete.", "High-risk actions such as card blocks, dispute submissions, or refunds should use deliberate confirmation patterns and clear completion receipts.", "If a task needs escalation or cannot be finished, the hand-off path should be obvious and should preserve context automatically.", "Loading, verification, and system-handshake states should explain what is happening rather than showing a blank wait state."]}, {"title": "Guardrails & quality", "cue": "Clarity, trust, and accessibility are non-negotiable.", "lines": ["Do not bury critical warnings, permissions, or action outcomes in secondary tabs or low-contrast text.", "Never rely on colour alone to signal risk, completion, or customer vulnerability.", "Keep keyboard flow, focus order, table readability, and density controls strong enough for extended adviser use.", "Avoid ornamental motion and keep the interface stable during real-time updates.", "The workspace should feel accountable, calm, and well-governed from end to end."]}]}, "mobile": {"title": "Retail banking mobile app", "strapline": "A full-service banking experience for daily money management, urgent tasks, and confidence-building support.", "industry": "Financial services", "targetUser": "Existing retail banking customers managing everyday money, card safety, and service issues on mobile", "businessGoal": "Increase digital servicing completion, improve retention, reduce support calls, and strengthen trust in self-service banking.", "kpis": ["Digital servicing completion rate", "Transfer success rate", "Support call deflection", "Monthly active users", "App store satisfaction"], "why": "This is complex because it combines sensitive financial actions, multiple journeys, trust-critical edge cases, and a wide range of system states within one app.", "prompt": [{"title": "Intent & user", "cue": "Design for confidence in everyday and high-stress moments.", "lines": ["Design a retail banking mobile application for existing customers who want to manage everyday money, move funds, control cards, handle suspicious activity, and get help without visiting a branch or calling support.", "The product must feel calm and trustworthy in routine tasks such as checking balances, but equally dependable when the user needs to freeze a card, raise a dispute, or respond to a fraud alert.", "Success means customers can complete common servicing tasks safely, understand what is happening with their money, and feel in control even during stressful moments."]}, {"title": "Journey & flow", "cue": "Support multiple journeys without losing coherence.", "lines": ["The home experience should open on a clear account overview with balances, recent activity, and the most likely next actions such as transfer money, manage card, or review alerts.", "Core journeys should include account overview, money transfer, standing order or payee management, card controls, fraud alert handling, dispute intake, savings goal creation, notification review, and secure support access.", "Each journey should have a distinct start, progress pattern, and outcome state, with strong recovery paths for interruption, verification, timeout, or suspected risk.", "The app should also support partial completion and re-entry where appropriate, especially for disputes and support journeys."]}, {"title": "Features & rules", "cue": "Banking actions need explicit operational rules.", "lines": ["Support current and savings account views, transaction search and filtering, internal and external transfers, card freeze and unfreeze, replacement card request, dispute intake, secure message or chat entry point, and savings goals.", "Show transaction status clearly, including pending, completed, reversed, and disputed states.", "Money movement flows should validate payee setup, available balance, transfer limits, and confirmation requirements.", "Fraud and dispute journeys must capture the right information step by step and explain what happens next.", "Authentication, step-up verification, and timeout behaviour should feel deliberate and understandable.", "Do not add speculative investment, crypto, or lifestyle extras that distract from core retail banking needs."]}, {"title": "Content & microcopy", "cue": "Users need clarity, especially when money is involved.", "lines": ["Use plain, direct language for balances, transfers, card controls, notifications, and support content.", "Where the app asks for verification, explain why it is needed and what the user should do next.", "Error states must be practical and specific, for example distinguishing between a temporary service issue, an incorrect detail, and a blocked action for security reasons.", "Fraud, dispute, and support copy should feel calm, respectful, and reassuring without becoming vague."]}, {"title": "Visual system", "cue": "Trustworthy, modern, and highly legible.", "lines": ["Use a refined mobile visual system with strong black text, clean surfaces, disciplined spacing, and Deloitte-green accents reserved for primary actions, confirmations, and guided emphasis.", "The interface should feel premium and dependable, not glossy or gimmicky.", "Data-heavy views such as transaction histories need quiet surfaces, careful contrast, and a strong typographic rhythm.", "Illustration, if used at all, should be minimal and functional."]}, {"title": "Layout & hierarchy", "cue": "Make the next action obvious without crowding the screen.", "lines": ["The home screen should prioritise balances, recent activity, alerts, and key actions in that order.", "Secondary destinations such as savings, help, profile, and notifications should remain easy to reach but not compete with core money tasks.", "Complex flows such as disputes and card servicing should use structured step layouts with calm spacing and persistent orientation cues.", "Transaction detail views should surface amount, merchant, date, status, and available actions clearly without burying important controls."]}, {"title": "Interaction & feedback", "cue": "Every action should feel safe and confirmable.", "lines": ["Transfers, card control changes, and support actions need clear pressed, loading, success, and failure states.", "High-risk actions should use deliberate confirmation patterns and should show clear receipts or reference details afterwards.", "Fraud and dispute journeys must save progress where appropriate and make it obvious what has been submitted and what is still required.", "Timeout, connectivity loss, and interrupted session states should help the user recover with minimal confusion.", "Touch targets, keyboard behaviour, screen-reader labels, and motion reduction need to be handled carefully throughout."]}, {"title": "Guardrails & quality", "cue": "Do not compromise trust for visual flair.", "lines": ["Do not hide important financial information, fees, limits, or next-step guidance inside collapsible fragments or secondary tabs.", "Avoid promotional clutter, excessive motion, or decorative charts that distract from money tasks.", "Never rely on colour alone to show transaction status, alerts, or blocked actions.", "Keep contrast, text scaling, focus states, and gesture discoverability strong enough for accessible mobile use.", "The app should feel reliable in both everyday and high-stress banking moments."]}]}, "website": {"title": "Airline booking and trip management website", "strapline": "A multi-step travel experience spanning search, booking, ancillaries, and post-booking management.", "industry": "Travel", "targetUser": "Leisure and frequent travellers planning and managing trips across devices", "businessGoal": "Increase booking conversion, improve attach rates for extras, reduce service contacts, and support self-service changes.", "kpis": ["Booking conversion rate", "Ancillary attach rate", "Self-service change completion", "Post-booking support contact reduction"], "why": "This is complex because it blends search, pricing, passenger details, add-ons, payment, and ongoing trip management with many branches and states.", "prompt": [{"title": "Intent & user", "cue": "Design for planning, comparison, and reassurance over time.", "lines": ["Design a responsive airline website for people who need to search, compare, book, and later manage flights across desktop and mobile.", "The experience should support both confident repeat travellers and less frequent travellers who need more reassurance around choices, baggage rules, and booking changes.", "Success means users can find a suitable flight, complete booking with confidence, and later manage the trip without contacting support."]}, {"title": "Journey & flow", "cue": "Cover the full travel lifecycle.", "lines": ["The main journey starts with flight search, moves through results, fare selection, passenger details, extras, payment, and booking confirmation.", "Secondary journeys include changing a booking, selecting seats, adding bags, checking travel requirements, and reviewing trip status.", "The flow needs to handle round trips, one-way bookings, multi-passenger groups, changing prices, unavailable seats, and interrupted payment states.", "The site should preserve orientation across long journeys and make it obvious where the user is, what is optional, and what is still required."]}, {"title": "Features & rules", "cue": "Travel logic has many moving parts.", "lines": ["Support flexible search, fare comparison, filtered results, seat selection, baggage and ancillary add-ons, traveller detail capture, payment, and post-booking trip management.", "Pricing should stay transparent as the user adds or removes options, with clear indication of what is included and what is extra.", "Support logged-in and guest flows, booking retrieval, and self-service changes within the relevant fare rules.", "Show travel requirements, restrictions, or route-specific notices at the right moments rather than burying them in footnotes.", "Handle inventory changes, expired fares, payment failures, and incomplete bookings with recovery paths that preserve as much progress as possible."]}, {"title": "Content & microcopy", "cue": "Explain choices and consequences clearly.", "lines": ["Use direct, plain language for fare rules, baggage allowances, seat choices, and change conditions.", "Optional add-ons should be explained without manipulative tactics.", "Warnings should tell the user exactly what has changed, why it matters, and what their options are.", "Confirmation and post-booking messages should feel calm, informative, and easy to return to later."]}, {"title": "Visual system", "cue": "Structured, premium, and easy to scan.", "lines": ["Use a disciplined visual language with strong typography, generous spacing, layered neutral surfaces, and restrained green accents for confirmation or progress cues.", "The site should feel modern and premium without becoming visually busy.", "Results pages and booking steps must stay readable even when carrying a lot of information.", "Avoid overuse of banners, hard-sell patterns, or promotional clutter that competes with the booking task."]}, {"title": "Layout & hierarchy", "cue": "Support long decision-making journeys.", "lines": ["Search and result views should prioritise times, price, fare type, and change conditions in a clear hierarchy.", "Booking steps need a visible progress pattern, a persistent summary of the current itinerary and cost, and enough room for complex form details.", "Trip management views should place the booked journey, next actions, and disruptions or updates at the top.", "Keep help, policies, and FAQs available without interrupting the booking flow."]}, {"title": "Interaction & feedback", "cue": "Preserve trust when the journey gets long.", "lines": ["Results filtering, fare selection, and extras should update clearly and without disorientation.", "If price or availability changes, explain it immediately and preserve the user’s choices where possible.", "Payment and confirmation states must feel especially solid, with clear success, failure, and retry patterns.", "Manage-booking actions such as seat change or added baggage should confirm both the action and any price impact before and after completion.", "Use motion sparingly and mainly to preserve continuity across multi-step transitions."]}, {"title": "Guardrails & quality", "cue": "Complex does not mean cluttered.", "lines": ["Do not hide core fare rules, total price, or change conditions behind dark patterns or tiny print.", "Never rely on colour alone to signal urgency, fare status, or required actions.", "Keep accessibility robust across long forms, tables, filters, progress patterns, and mobile transitions.", "The site should remain understandable when users switch devices, lose connection, or return later to manage a booking.", "Make the experience feel dependable and respectful throughout the full trip lifecycle."]}]}}}};
+
+    const state = {
+      complexity: 'simple',
+      platform: 'webapp'
+    };
+
+    const complexityLabels = {
+      simple: 'Simple',
+      medium: 'Medium',
+      complex: 'Complex'
+    };
+    const complexityDesc = {
+      simple: 'One goal, few screens',
+      medium: 'Multiple flows and rules',
+      complex: 'Rich logic, edge cases'
+    };
+
+    const platformLabels = {
+      webapp: 'Web app',
+      mobile: 'Mobile app',
+      website: 'Website'
+    };
+
+    const frameworkGrid = document.getElementById('frameworkGrid');
+    const benefitsGrid = document.getElementById('benefitsGrid');
+    const complexityGrid = document.getElementById('complexityGrid');
+    const complexityTabs = document.getElementById('complexityTabs');
+    const platformTabs = document.getElementById('platformTabs');
+    const metaCard = document.getElementById('metaCard');
+    const promptLayers = document.getElementById('promptLayers');
+    const copyPromptBtn = document.getElementById('copyPrompt');
+    const expandAllBtn = document.getElementById('expandAll');
+    const collapseAllBtn = document.getElementById('collapseAll');
+
+    function buildFramework(){
+      frameworkGrid.innerHTML = DATA.frameworkLayers.map(layer => `
+        <article class="card layer-card" data-num="${layer.num}">
+          <div class="num">${layer.num}</div>
+          <div>
+            <h3>${layer.title}</h3>
+            <p><strong style="color:#10110f">What it covers:</strong> ${layer.covers}</p>
+          </div>
+          <p>${layer.why}</p>
+          <div class="starter"><strong>Prompt starter:</strong> ${layer.starter}</div>
+        </article>
+      `).join('');
+    }
+
+    function buildBenefits(){
+      benefitsGrid.innerHTML = DATA.benefits.map(item => `
+        <article class="card benefit-card">
+          <div class="small">Benefit</div>
+          <h3>${item.title}</h3>
+          <p>${item.text}</p>
+        </article>
+      `).join('');
+    }
+
+    function buildComplexity(){
+      complexityGrid.innerHTML = DATA.complexityNotes.map((item, idx) => `
+        <article class="complexity-card" data-ghost="0${idx+1}">
+          <div class="small">Project type</div>
+          <h3>${item.title}</h3>
+          <p>${item.summary}</p>
+          <div class="focus"><strong style="display:block; margin-bottom:7px;">Design focus</strong>${item.focus}</div>
+        </article>
+      `).join('');
+    }
+
+    function buildTabs(){
+      complexityTabs.innerHTML = Object.entries(complexityLabels).map(([key, label]) => `
+        <button class="nav-primary-btn" data-complexity="${key}" aria-pressed="${state.complexity === key}">
+          <span class="nav-label">${label}</span>
+          <span class="nav-title">${complexityDesc[key]}</span>
+        </button>
+      `).join('');
+      platformTabs.innerHTML = Object.entries(platformLabels).map(([key, label]) => `
+        <button class="nav-sec-btn" data-platform="${key}" aria-pressed="${state.platform === key}">${label}</button>
+      `).join('');
+
+      complexityTabs.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.complexity = btn.dataset.complexity;
+          renderPromptView();
+          buildTabs();
+        });
+      });
+
+      platformTabs.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.platform = btn.dataset.platform;
+          renderPromptView();
+          buildTabs();
+        });
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function buildFullPrompt(example){
+      return example.prompt.map(section => {
+        const lines = section.lines.map(line => `- ${line}`).join('\n');
+        return `${section.title.toUpperCase()}\n${lines}`;
+      }).join('\n\n');
+    }
+
+    function renderPromptView(){
+      const example = DATA.examples[state.complexity][state.platform];
+      metaCard.classList.remove('fade');
+      promptLayers.classList.remove('fade');
+      void metaCard.offsetWidth;
+      void promptLayers.offsetWidth;
+      metaCard.classList.add('fade');
+      promptLayers.classList.add('fade');
+
+      metaCard.innerHTML = `
+        <div class="small">${complexityLabels[state.complexity]} · ${platformLabels[state.platform]}</div>
+        <h3>${example.title}</h3>
+        <p class="meta-sub">${example.strapline}</p>
+        <p class="meta-context">${example.industry} · ${example.targetUser}</p>
+
+        <div class="meta-block">
+          <div class="meta-label">Business goal</div>
+          <p class="meta-text">${example.businessGoal}</p>
+        </div>
+
+        <div class="meta-block">
+          <div class="meta-label">Why this level</div>
+          <p class="meta-text">${example.why}</p>
+        </div>
+
+        <div class="meta-block">
+          <div class="meta-label">Illustrative KPIs</div>
+          <div class="kpi-list">
+            ${example.kpis.map(kpi => `<span class="kpi">${kpi}</span>`).join('')}
+          </div>
+        </div>
+      `;
+
+      promptLayers.innerHTML = example.prompt.map((section, index) => `
+        <details class="layer" ${index < 2 ? 'open' : ''}>
+          <summary>
+            <div class="summary-left">
+              <div class="summary-top">
+                <span class="badge">${String(index + 1).padStart(2, '0')}</span>
+                <span>${section.title}</span>
+              </div>
+              <div class="summary-cue">${section.cue}</div>
+            </div>
+            <span class="chev" aria-hidden="true"></span>
+          </summary>
+          <div class="layer-body">
+            <ul>
+              ${section.lines.map(line => `<li>${escapeHtml(line)}</li>`).join('')}
+            </ul>
+          </div>
+        </details>
+      `).join('');
+
+      copyPromptBtn.onclick = async () => {
+        const prompt = buildFullPrompt(example);
+        try{
+          await navigator.clipboard.writeText(prompt);
+          const original = copyPromptBtn.textContent;
+          copyPromptBtn.textContent = 'Copied';
+          setTimeout(() => copyPromptBtn.textContent = original, 1400);
+        }catch(err){
+          alert('Copy was blocked by the browser. You can still select and copy the text manually.');
+        }
+      };
+
+      expandAllBtn.onclick = () => {
+        promptLayers.querySelectorAll('details.layer').forEach(detail => detail.open = true);
+      };
+
+      collapseAllBtn.onclick = () => {
+        promptLayers.querySelectorAll('details.layer').forEach((detail, idx) => detail.open = idx === 0);
+      };
+    }
+
+    function initReveal(){
+      const els = document.querySelectorAll('[data-reveal]');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('shown');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {threshold: .12});
+      els.forEach(el => observer.observe(el));
+    }
+
+    buildFramework();
+    buildBenefits();
+    buildComplexity();
+    buildTabs();
+    renderPromptView();
+    initReveal();
+
+    /* Measure nav height and set sticky-panel top dynamically */
+    function setStickyTop(){
+      const nav = document.querySelector('.prompt-nav');
+      const panel = document.querySelector('.sticky-panel');
+      if(!nav || !panel) return;
+      const navTop = parseFloat(getComputedStyle(nav).top) || 55;
+      const navH = nav.offsetHeight;
+      panel.style.setProperty('--sticky-top', (navTop + navH + 8) + 'px');
+    }
+    setStickyTop();
+    window.addEventListener('resize', setStickyTop);
+
+    /* Highlight active nav link on scroll */
+    (function(){
+      const links = document.querySelectorAll('.navlinks a[href^="#"]');
+      const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+      function update(){
+        let current = '';
+        sections.forEach(sec => {
+          if(sec.getBoundingClientRect().top <= 120) current = sec.id;
+        });
+        links.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+        });
+      }
+      window.addEventListener('scroll', update, {passive:true});
+      update();
+    })();
+  </script>
+</body>
+</html>
