@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Foundry — System Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background: #0a0f0d;
+    color: #e6e6e6;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  
+  .page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #86BC25;
+    margin-bottom: 8px;
+  }
+  
+  .page-header p {
+    font-size: 15px;
+    color: #999;
+  }
+
+  .diagram-section {
+    max-width: 1200px;
+    margin: 0 auto 60px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #86BC25;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(134,188,37,0.2);
+  }
+
+  /* WORKFLOW FLOW */
+  .workflow-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding: 16px 0;
+  }
+
+  .phase-card {
+    flex: 1;
+    min-width: 190px;
+    background: rgba(28, 61, 38, 0.3);
+    border: 1px solid rgba(134, 188, 37, 0.15);
+    border-radius: 8px;
+    padding: 20px 16px;
+    position: relative;
+    transition: all 0.25s;
+  }
+
+  .phase-card:hover {
+    background: rgba(28, 61, 38, 0.5);
+    border-color: rgba(134, 188, 37, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .phase-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    color: #86BC25;
+    font-size: 24px;
+    font-weight: 300;
+  }
+
+  .phase-number {
+    font-size: 11px;
+    font-weight: 600;
+    color: #86BC25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .phase-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .phase-desc {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+
+  .phase-output {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(134,188,37,0.1);
+    font-size: 11px;
+    color: #86BC25;
+  }
+
+  .phase-output strong {
+    display: block;
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+  }
+
+  /* MODE SYSTEM */
+  .modes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .mode-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.25s;
+    cursor: default;
+  }
+
+  .mode-card:hover {
+    background: rgba(28, 61, 38, 0.3);
+    border-color: rgba(134, 188, 37, 0.3);
+  }
+
+  .mode-card.default-mode { border-left: 3px solid #86BC25; }
+  .mode-card.creative-mode { border-left: 3px solid #0DF200; }
+  .mode-card.figma-mode { border-left: 3px solid #00A3E0; }
+  .mode-card.reference-mode { border-left: 3px solid #ED8B00; }
+  .mode-card.pattern-mode { border-left: 3px solid #62B5E5; }
+
+  .mode-icon { font-size: 24px; margin-bottom: 10px; }
+  .mode-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .mode-desc { font-size: 12px; color: #999; line-height: 1.5; }
+  .mode-addon { font-size: 11px; color: #666; margin-top: 10px; font-style: italic; }
+
+  /* FILE TREE */
+  .file-tree {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 24px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .file-tree .dir { color: #86BC25; }
+  .file-tree .file { color: #ccc; }
+  .file-tree .comment { color: #555; }
+  .file-tree .lines { color: #ED8B00; font-size: 11px; }
+
+  /* GATES */
+  .gates-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .gate-card {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: all 0.25s;
+  }
+
+  .gate-card:hover {
+    border-color: rgba(134,188,37,0.3);
+    background: rgba(28,61,38,0.2);
+  }
+
+  .gate-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: #86BC25;
+    margin-bottom: 6px;
+  }
+
+  .gate-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .gate-desc {
+    font-size: 10px;
+    color: #888;
+    line-height: 1.5;
+  }
+
+  /* TOKEN LAYERS */
+  .token-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .token-layer {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-radius: 6px;
+    transition: all 0.25s;
+  }
+
+  .token-layer:hover { transform: translateX(4px); }
+
+  .token-layer.layer-1 { background: rgba(134,188,37,0.15); border-left: 4px solid #86BC25; }
+  .token-layer.layer-2 { background: rgba(38,137,13,0.12); border-left: 4px solid #26890D; }
+  .token-layer.layer-3 { background: rgba(4,106,56,0.1); border-left: 4px solid #046A38; }
+  .token-layer.layer-bridge { background: rgba(0,163,224,0.08); border-left: 4px solid #00A3E0; }
+  .token-layer.layer-tw { background: rgba(237,139,0,0.08); border-left: 4px solid #ED8B00; }
+
+  .token-name { font-size: 14px; font-weight: 700; color: #fff; min-width: 200px; }
+  .token-file { font-size: 12px; color: #86BC25; min-width: 180px; font-family: monospace; }
+  .token-desc { font-size: 12px; color: #999; }
+
+  /* PROMPT FRAMEWORK */
+  .prompt-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .prompt-layer {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.25s;
+  }
+
+  .prompt-layer:hover { background: rgba(28,61,38,0.2); border-color: rgba(134,188,37,0.15); }
+
+  .prompt-num { font-size: 24px; font-weight: 700; color: #86BC25; min-width: 48px; }
+  .prompt-label { font-size: 14px; font-weight: 700; color: #fff; min-width: 120px; }
+  .prompt-example { font-size: 12px; color: #999; font-style: italic; }
+  .prompt-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-left: auto; white-space: nowrap; }
+  .prompt-tag.required { background: rgba(134,188,37,0.15); color: #86BC25; }
+  .prompt-tag.recommended { background: rgba(0,163,224,0.1); color: #62B5E5; }
+  .prompt-tag.optional { background: rgba(255,255,255,0.05); color: #666; }
+
+  /* EDGE CASE CATEGORIES */
+  .edge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+  }
+
+  .edge-card {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .edge-count { font-size: 28px; font-weight: 700; color: #86BC25; }
+  .edge-label { font-size: 11px; color: #999; margin-top: 4px; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    background: rgba(28,61,38,0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(134,188,37,0.1);
+  }
+
+  .stat-value { font-size: 32px; font-weight: 700; color: #86BC25; }
+  .stat-label { font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  @media (max-width: 800px) {
+    body { padding: 20px; }
+    .workflow-flow { flex-direction: column; }
+    .phase-arrow { transform: rotate(90deg); height: 36px; width: auto; }
+    .gates-row { grid-template-columns: repeat(3, 1fr); }
+    .stats-bar { flex-wrap: wrap; }
+    .stat-item { min-width: calc(50% - 12px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>PIXEL FOUNDRY</h1>
+  <p>AI-Powered Product Design System &mdash; Architecture Overview</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar" style="max-width:1200px;margin:0 auto 48px;">
+  <div class="stat-item">
+    <div class="stat-value">13</div>
+    <div class="stat-label">Files</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">3,675</div>
+    <div class="stat-label">Lines of Code</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">5</div>
+    <div class="stat-label">Modes</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">6</div>
+    <div class="stat-label">Quality Gates</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">36+</div>
+    <div class="stat-label">Edge Cases Handled</div>
+  </div>
+</div>
+
+<!-- WORKFLOW -->
+<div class="diagram-section">
+  <div class="section-title">Workflow: 5 Phases</div>
+  <div class="workflow-flow">
+    <div class="phase-card">
+      <div class="phase-number">Phase 0</div>
+      <div class="phase-name">Mode Select</div>
+      <div class="phase-desc">Claude presents 5 mode options. Loads relevant add-on. Runs pre-flight checks (MCP test, image analysis, pattern lookup).</div>
+      <div class="phase-output"><strong>Output</strong>Selected mode + pre-flight confirmation</div>
+    </div>
+    <div class="phase-arrow">→</div>
+    <div class="phase-card">
+      <div class="phase-number">Phase 1</div>
+      <div class="phase-name">Discover</div>
+      <div class="phase-desc">Scenario question + rapid-fire specifics. Derives density, theme, touch targets, font minimums. Saves persona to DESIGN-BRIEF.md.</div>
+      <div class="phase-output"><strong>Output</strong>Dynamic persona profile</div>
+    </div>
+    <div class="phase-arrow">→</div>
+    <div class="phase-card">
+      <div class="phase-number">Phase 2</div>
+      <div class="phase-name">Plan</div>
+      <div class="phase-desc">ASCII wireframe, component list, page routes, responsive rules, interaction map. For reference mode: adopt/override analysis.</div>
+      <div class="phase-output"><strong>Output</strong>Design Plan (user approves)</div>
+    </div>
+    <div class="phase-arrow">→</div>
+    <div class="phase-card">
+      <div class="phase-number">Phase 3</div>
+      <div class="phase-name">Execute</div>
+      <div class="phase-desc">Multi-page app with Next.js routing, shared layout, working interactions, 4 states per view, chart boilerplate, humane content.</div>
+      <div class="phase-output"><strong>Output</strong>Working application code</div>
+    </div>
+    <div class="phase-arrow">→</div>
+    <div class="phase-card">
+      <div class="phase-number">Phase 4</div>
+      <div class="phase-name">Verify</div>
+      <div class="phase-desc">6 sequential quality gates. Auto-fixes violations. Veteran quality check. Pattern save suggestion.</div>
+      <div class="phase-output"><strong>Output</strong>Bug-free, professional UI</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODES -->
+<div class="diagram-section">
+  <div class="section-title">Mode System</div>
+  <div class="modes-grid">
+    <div class="mode-card default-mode">
+      <div class="mode-icon">🏭</div>
+      <div class="mode-name">Default</div>
+      <div class="mode-desc">Strict Deloitte industrial style. Flat surfaces, sharp borders, maximum data density.</div>
+      <div class="mode-addon">No add-on loaded</div>
+    </div>
+    <div class="mode-card creative-mode">
+      <div class="mode-icon">✨</div>
+      <div class="mode-name">Creative</div>
+      <div class="mode-desc">Glass, gradients, depth. 4 moods: Industrial, Modern, Executive, Cinematic. Flex/Locked zones.</div>
+      <div class="mode-addon">addons/creative-mode.md (243 lines)</div>
+    </div>
+    <div class="mode-card reference-mode">
+      <div class="mode-icon">🖼️</div>
+      <div class="mode-name">Reference</div>
+      <div class="mode-desc">Extracts layout logic from screenshots. 3-step protocol: grid → populate → elevate.</div>
+      <div class="mode-addon">addons/reference-mode.md (222 lines)</div>
+    </div>
+    <div class="mode-card figma-mode">
+      <div class="mode-icon">🎨</div>
+      <div class="mode-name">Figma</div>
+      <div class="mode-desc">Implements approved Figma designs via MCP. 95% layout fidelity. Token override.</div>
+      <div class="mode-addon">addons/figma-mode.md (241 lines)</div>
+    </div>
+    <div class="mode-card pattern-mode">
+      <div class="mode-icon">📚</div>
+      <div class="mode-name">Pattern Library</div>
+      <div class="mode-desc">Reuses proven patterns from past projects. Max 30 entries. Suggest-and-approve.</div>
+      <div class="mode-addon">addons/pattern-library.md (223 lines)</div>
+    </div>
+  </div>
+</div>
+
+<!-- VERIFICATION GATES -->
+<div class="diagram-section">
+  <div class="section-title">6 Verification Gates (Sequential)</div>
+  <div class="gates-row">
+    <div class="gate-card">
+      <div class="gate-num">0</div>
+      <div class="gate-name">Style</div>
+      <div class="gate-desc">Scan for banned Tailwind classes, hardcoded hex, wrong font sizes. Auto-fix.</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-num">1</div>
+      <div class="gate-name">Interaction</div>
+      <div class="gate-desc">Every button, table header, chart, form, toggle has working handler.</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-num">2</div>
+      <div class="gate-name">Journey</div>
+      <div class="gate-desc">Multi-page routing. Sidebar nav works. URL state persists. Back button works.</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-num">3</div>
+      <div class="gate-name">Layout</div>
+      <div class="gate-desc">No overflow at 800/1024/1440px. Charts sized. KPIs wrap. Suspense wrapped.</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-num">4</div>
+      <div class="gate-name">States</div>
+      <div class="gate-desc">Loading skeleton, empty state, error alert all implemented. All 4 reachable.</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-num">5</div>
+      <div class="gate-name">Veteran</div>
+      <div class="gate-desc">One focal point. 3 hierarchy levels. Color purposeful. Data contextual. Professional.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOKEN ARCHITECTURE -->
+<div class="diagram-section">
+  <div class="section-title">Token Architecture</div>
+  <div class="token-stack">
+    <div class="token-layer layer-1">
+      <div class="token-name">Primitives</div>
+      <div class="token-file">primitives.json</div>
+      <div class="token-desc">Raw brand values: 47 colors, 6 fonts, spacing grid, breakpoints. Swap to rebrand.</div>
+    </div>
+    <div class="token-layer layer-2">
+      <div class="token-name">Semantic Tokens</div>
+      <div class="token-file">tokens.css</div>
+      <div class="token-desc">150+ CSS custom properties. Surface, text, border, interactive, status, data viz. Light/dark mode.</div>
+    </div>
+    <div class="token-layer layer-3">
+      <div class="token-name">Component Tokens</div>
+      <div class="token-file">tokens.css</div>
+      <div class="token-desc">Per-component specs: button sizes by density, table row heights, touch targets, chart colors.</div>
+    </div>
+    <div class="token-layer layer-bridge">
+      <div class="token-name">shadcn Bridge</div>
+      <div class="token-file">shadcn-bridge.css</div>
+      <div class="token-desc">Remaps shadcn/ui CSS variables to Deloitte tokens. Includes 8 animations, 12 utility classes.</div>
+    </div>
+    <div class="token-layer layer-tw">
+      <div class="token-name">Tailwind Override</div>
+      <div class="token-file">tailwind.config.ts</div>
+      <div class="token-desc">Forces Tailwind defaults to Deloitte values: text-sm=13px (not 14px), removes rounded-2xl/3xl.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROMPT FRAMEWORK -->
+<div class="diagram-section">
+  <div class="section-title">Prompt Framework (5 Layers)</div>
+  <div class="prompt-layers">
+    <div class="prompt-layer">
+      <div class="prompt-num">1</div>
+      <div class="prompt-label">WHAT</div>
+      <div class="prompt-example">"Build a [product type] for [purpose]"</div>
+      <div class="prompt-tag required">Required</div>
+    </div>
+    <div class="prompt-layer">
+      <div class="prompt-num">2</div>
+      <div class="prompt-label">WHO</div>
+      <div class="prompt-example">"Used by [role] on [device] in [environment]"</div>
+      <div class="prompt-tag recommended">Recommended</div>
+    </div>
+    <div class="prompt-layer">
+      <div class="prompt-num">3</div>
+      <div class="prompt-label">PAGES</div>
+      <div class="prompt-example">"Dashboard, Machine List, Detail View, Settings"</div>
+      <div class="prompt-tag recommended">Recommended</div>
+    </div>
+    <div class="prompt-layer">
+      <div class="prompt-num">4</div>
+      <div class="prompt-label">JOURNEYS</div>
+      <div class="prompt-example">"User opens → spots anomaly → clicks machine → acknowledges alarm"</div>
+      <div class="prompt-tag optional">Optional</div>
+    </div>
+    <div class="prompt-layer">
+      <div class="prompt-num">5</div>
+      <div class="prompt-label">CONSTRAINTS</div>
+      <div class="prompt-example">"Must work on tablet. Real-time refresh. Export to PDF."</div>
+      <div class="prompt-tag optional">Optional</div>
+    </div>
+  </div>
+</div>
+
+<!-- EDGE CASES -->
+<div class="diagram-section">
+  <div class="section-title">Edge Cases Covered: 36+ Across 9 Categories</div>
+  <div class="edge-grid">
+    <div class="edge-card"><div class="edge-count">7</div><div class="edge-label">Mode Switching</div></div>
+    <div class="edge-card"><div class="edge-count">5</div><div class="edge-label">Reference Quality</div></div>
+    <div class="edge-card"><div class="edge-count">7</div><div class="edge-label">Figma MCP</div></div>
+    <div class="edge-card"><div class="edge-count">4</div><div class="edge-label">Creative Effects</div></div>
+    <div class="edge-card"><div class="edge-count">4</div><div class="edge-label">Pattern Library</div></div>
+    <div class="edge-card"><div class="edge-count">4</div><div class="edge-label">Quality Guards</div></div>
+    <div class="edge-card"><div class="edge-count">3</div><div class="edge-label">Mode Combos</div></div>
+    <div class="edge-card"><div class="edge-count">1</div><div class="edge-label">Version Control</div></div>
+    <div class="edge-card"><div class="edge-count">1</div><div class="edge-label">Multi-User</div></div>
+  </div>
+</div>
+
+<!-- FILE TREE -->
+<div class="diagram-section">
+  <div class="section-title">File Architecture</div>
+  <div class="file-tree">
+    <span class="dir">pixel-foundry-complete/</span><br>
+    ├── <span class="file">CLAUDE.md</span> <span class="lines">(34)</span> <span class="comment">← Entry point. Routes add-ons.</span><br>
+    ├── <span class="file">SETUP-GUIDE.md</span> <span class="lines">(139)</span> <span class="comment">← PM setup guide (not in project)</span><br>
+    ├── <span class="file">PROMPT-FRAMEWORK-AND-TESTS.md</span> <span class="lines">(486)</span> <span class="comment">← 10 test prompts (not in project)</span><br>
+    ├── <span class="file">MODE-TESTING-GUIDE.md</span> <span class="lines">(220)</span> <span class="comment">← 7 mode comparison tests</span><br>
+    └── <span class="dir">pixel-foundry/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">SKILL.md</span> <span class="lines">(555)</span> <span class="comment">← Core brain: persona, workflow, gates</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="dir">addons/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">creative-mode.md</span> <span class="lines">(243)</span> <span class="comment">← Moods, glass, gradients, zones</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">figma-mode.md</span> <span class="lines">(241)</span> <span class="comment">← MCP pre-flight, trust rules</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">reference-mode.md</span> <span class="lines">(222)</span> <span class="comment">← Screenshot extract protocol</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">pattern-library.md</span> <span class="lines">(223)</span> <span class="comment">← Grows across projects</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;└── <span class="dir">tokens/</span> <span class="comment">← Deloitte foundation (never changes)</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">tokens.css</span> <span class="lines">(445)</span> <span class="comment">← 150+ CSS custom properties</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">shadcn-bridge.css</span> <span class="lines">(476)</span> <span class="comment">← shadcn → Deloitte remapping</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">tailwind.config.ts</span> <span class="lines">(209)</span> <span class="comment">← Tailwind overrides</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">primitives.json</span> <span class="lines">(183)</span> <span class="comment">← Raw brand values (swap to rebrand)</span><br>
+  </div>
+</div>
+
+<div style="text-align:center;padding:40px 0;color:#555;font-size:12px;">
+  Pixel Foundry &mdash; Physical AI Team, Deloitte &mdash; March 2026 &mdash; Confidential
+</div>
+
+</body>
+</html>
