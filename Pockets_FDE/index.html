@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pockets — Forward Deployed Engineering | Deloitte Studios Chennai</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#08090B;--bg2:#0D0E11;--bg3:#111215;
+--card:rgba(255,255,255,0.025);--card2:rgba(255,255,255,0.045);--card3:rgba(255,255,255,0.065);
+--gb:rgba(255,255,255,0.06);--gb2:rgba(255,255,255,0.1);
+--text:#EFEFE8;--t2:#9A9A93;--t3:#5A5A54;--t4:#333330;
+--green:#86BC25;--gS:rgba(134,188,37,0.1);--gG:rgba(134,188,37,0.035);
+--blue:#3B7DDD;--bS:rgba(59,125,221,0.1);
+--amber:#E5A84B;--aS:rgba(229,168,75,0.08);
+--cyan:#06B6D4;--cS:rgba(6,182,212,0.08);
+--em:#10B981;--eS:rgba(16,185,129,0.08);
+--rose:#F43F5E;--rS:rgba(244,63,94,0.06);
+--vi:#8B5CF6;--vS:rgba(139,92,246,0.08);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.7}
+
+/* Grain */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:0.018;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+#prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--green),var(--blue),var(--vi),var(--rose));z-index:1001;width:0%;transition:width 0.05s}
+
+#fnav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:2px;padding:5px 6px;border-radius:44px;background:rgba(8,9,11,0.82);backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 24px rgba(0,0,0,0.3)}
+.fn{padding:9px 16px;border-radius:32px;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;transition:all 0.3s;white-space:nowrap}
+.fn:hover{color:var(--t2);background:rgba(255,255,255,0.03)}.fn.ac{color:var(--green);background:var(--gG)}
+
+#mbtn{position:fixed;bottom:20px;right:20px;z-index:999;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,0.05);background:rgba(8,9,11,0.75);backdrop-filter:blur(16px);color:var(--t3);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.4s}
+#mbtn:hover,#mbtn.on{border-color:var(--green);color:var(--green);box-shadow:0 0 24px var(--gS)}
+
+section{position:relative;overflow:hidden;padding:120px 40px}
+.s-xl{padding:160px 40px}
+.inner{max-width:1060px;margin:0 auto;position:relative;z-index:2}
+.inner-sm{max-width:760px;margin:0 auto;position:relative;z-index:2}
+
+.serif{font-family:'DM Serif Display',serif}.stat-num{font-family:'Sora',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',monospace}
+.label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:20px;display:block}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(64px,10vw,110px);line-height:1;font-weight:400;letter-spacing:-0.03em}
+h2{font-family:'DM Serif Display',serif;font-size:clamp(34px,4.5vw,52px);line-height:1.12;font-weight:400;letter-spacing:-0.01em}
+h3{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400}
+.sub{font-size:17px;color:var(--t2);line-height:1.8;max-width:600px}
+
+.rv{opacity:0;transform:translateY(20px) scale(0.985);filter:blur(3px);transition:all 0.85s cubic-bezier(0.22,1,0.36,1)}
+.rv.v{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}.d6{transition-delay:.6s}.d7{transition-delay:.7s}
+
+.gc{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--gb);border-radius:20px;padding:32px;position:relative;transition:all 0.5s cubic-bezier(0.22,1,0.36,1)}
+.gc::before{content:'';position:absolute;inset:-1px;border-radius:20px;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,0.06) 50%,transparent 70%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:0;transition:opacity 0.5s;padding:1px}
+.gc:hover{background:var(--card2);transform:translateY(-2px);box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.gc:hover::before{opacity:1}
+.gl-v:hover{box-shadow:0 0 40px var(--vS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(139,92,246,0.15)}
+.gl-c:hover{box-shadow:0 0 40px var(--cS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(6,182,212,0.15)}
+.gl-e:hover{box-shadow:0 0 40px var(--eS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(16,185,129,0.15)}
+.gl-a:hover{box-shadow:0 0 40px var(--aS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(229,168,75,0.15)}
+.gl-g:hover{box-shadow:0 0 40px var(--gS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(134,188,37,0.15)}
+.gl-b:hover{box-shadow:0 0 40px var(--bS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(59,125,221,0.15)}
+.gl-r:hover{box-shadow:0 0 40px var(--rS),0 20px 60px rgba(0,0,0,0.25);border-color:rgba(244,63,94,0.15)}
+
+.tag{font-size:11px;font-weight:500;padding:5px 14px;border-radius:100px;display:inline-block;margin:3px 2px}
+.b4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.b3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.b2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.grid-bg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px);background-size:64px 64px}
+.grid-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 0%,var(--bg) 75%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);z-index:0;pointer-events:none;animation:orb-float 16s ease-in-out infinite alternate}
+@keyframes orb-float{0%{transform:translate(0,0) scale(1)}33%{transform:translate(15px,-25px) scale(1.05)}66%{transform:translate(-10px,15px) scale(0.95)}100%{transform:translate(20px,-10px) scale(1.02)}}
+
+.marquee{overflow:hidden;padding:16px 0;border-top:1px solid rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.03)}
+.mq-i{display:flex;gap:36px;animation:msc 40s linear infinite;white-space:nowrap;width:max-content}
+.mq-i span{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+@keyframes msc{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.pipe-track{position:relative;padding-left:52px}
+.pipe-ln{position:absolute;left:19px;top:0;width:2px;height:0%;background:linear-gradient(to bottom,var(--green),var(--blue),var(--vi));border-radius:2px;transition:height 0.15s ease;z-index:1}
+.pipe-bg{position:absolute;left:19px;top:0;width:2px;height:100%;background:var(--t4);border-radius:2px;z-index:0}
+.ps{padding:20px 28px;border-radius:16px;position:relative;transition:all 0.4s;margin-bottom:8px;border:1px solid transparent}
+.ps .pn{position:absolute;left:-44px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-size:10px;font-weight:600;border:1.5px solid var(--t4);color:var(--t3);transition:all 0.4s;background:var(--bg);z-index:2}
+.ps.lit{background:var(--card2);border-color:var(--gb)}
+.ps.lit .pn{border-color:var(--green);color:var(--bg);background:var(--green);box-shadow:0 0 16px var(--gS)}
+.ps.lit .ps-t{color:var(--green)}
+
+.gtab{display:flex;gap:6px;flex-wrap:wrap;margin:28px 0}
+.gtab button{padding:10px 22px;border-radius:100px;border:1px solid var(--t4);background:transparent;font-family:'Sora';font-size:13px;font-weight:500;cursor:pointer;transition:all 0.3s;color:var(--t2)}
+.gtab button.ac{background:var(--green);color:var(--bg);border-color:var(--green);box-shadow:0 0 16px var(--gS)}
+.gtab button:hover:not(.ac){border-color:var(--t2);background:var(--card)}
+.gp{display:none;flex-direction:column;gap:10px;animation:gf 0.45s ease}.gp.ac{display:flex}
+@keyframes gf{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.ccard .c-edge{max-height:0;overflow:hidden;transition:max-height 0.4s,opacity 0.3s;opacity:0}
+.ccard:hover .c-edge{max-height:160px;opacity:1}
+
+.wave{width:100%;height:90px;position:relative}.wave svg{width:100%;height:100%;display:block}
+
+.ctr{font-family:'Sora',sans-serif;font-weight:700;display:inline}
+
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin:36px 0;border-radius:20px;overflow:hidden}
+.vs-col{padding:36px 32px}
+.vs-col h4{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:16px}
+.vs-item{font-size:14px;color:var(--t2);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+
+/* Tablet */
+@media(max-width:1024px){
+#fnav{padding:4px 5px}
+.fn{padding:7px 12px;font-size:11px}
+.b4{grid-template-columns:1fr 1fr}
+section{padding:100px 32px}
+.s-xl{padding:120px 32px}
+}
+
+/* Mobile */
+@media(max-width:768px){
+#fnav{top:auto;bottom:0;left:0;right:0;transform:none;border-radius:0;padding:6px 12px;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;justify-content:flex-start;border-top:1px solid rgba(255,255,255,0.05);border-left:none;border-right:none;border-bottom:none;background:rgba(8,9,11,0.92);box-shadow:0 -4px 24px rgba(0,0,0,0.4)}
+#fnav::-webkit-scrollbar{display:none}
+.fn{padding:10px 14px;font-size:11px;flex-shrink:0}
+#mbtn{bottom:70px}
+section{padding:60px 20px}
+.s-xl{padding:80px 20px}
+.b4,.b3,.b2,.vs-grid{grid-template-columns:1fr}
+h1{font-size:clamp(44px,12vw,64px)}
+h2{font-size:clamp(28px,7vw,42px)}
+h3{font-size:19px}
+.sub{font-size:15px}
+.label{font-size:10px;letter-spacing:2px}
+.gc{padding:24px;border-radius:16px}
+.pipe-track{padding-left:42px}
+.ps .pn{left:-36px}
+.ps{padding:16px 20px}
+.ps p{font-size:12px}
+.gtab{gap:4px}
+.gtab button{padding:8px 16px;font-size:12px}
+.marquee{padding:12px 0}
+.mq-i span{font-size:10px}
+.tag{font-size:10px;padding:4px 10px}
+.inner,.inner-sm{padding:0}
+.orb{opacity:0.5}
+}
+
+/* Small mobile */
+@media(max-width:480px){
+section{padding:48px 16px}
+.s-xl{padding:64px 16px}
+h1{font-size:clamp(36px,11vw,52px)}
+h2{font-size:clamp(24px,6.5vw,36px)}
+.gc{padding:20px;border-radius:14px}
+.sub{font-size:14px}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<nav id="fnav"><div class="fn ac" data-s="hero">Pockets</div><div class="fn" data-s="problem">Problem</div><div class="fn" data-s="insight">Insight</div><div class="fn" data-s="arch">Architecture</div><div class="fn" data-s="llm">AI</div><div class="fn" data-s="team">Team</div><div class="fn" data-s="gov">Governance</div><div class="fn" data-s="opp">Market</div><div class="fn" data-s="gtm">GTM</div><div class="fn" data-s="edge">Edge</div><div class="fn" data-s="fly">Flywheel</div></nav>
+<button id="mbtn" onclick="toggleM()">♪</button>
+
+<!-- ===== HERO ===== -->
+<section id="hero" class="s-xl" style="min-height:100vh;display:flex;align-items:center">
+<div class="grid-bg"></div>
+<div class="orb" style="width:500px;height:500px;background:rgba(134,188,37,0.04);top:-15%;right:-10%;animation-delay:-2s"></div>
+<div class="orb" style="width:350px;height:350px;background:rgba(59,125,221,0.03);bottom:5%;left:-5%;animation-delay:-8s"></div>
+<div class="orb" style="width:200px;height:200px;background:rgba(139,92,246,0.04);top:40%;right:20%;animation-delay:-12s"></div>
+<div class="inner">
+<div class="rv"><span class="mono" style="font-size:11px;letter-spacing:3px;color:var(--green)">DELOITTE STUDIOS CHENNAI · AM&C PRACTICE</span></div>
+<div class="rv d1"><h1 style="margin-top:16px">Pockets</h1></div>
+<div class="rv d2" style="margin-top:24px"><p style="font-size:21px;color:var(--t2);line-height:1.7;max-width:660px">The enterprise AI gap isn't a technology problem. It's a delivery problem. <strong style="color:var(--text)">Pockets is how we solve it</strong> — forward deployed engineering teams on a platform architecture that compounds with every deployment.</p></div>
+<div class="rv d3" style="margin-top:40px"><div style="width:56px;height:2.5px;background:var(--green);border-radius:2px"></div></div>
+<div class="rv d4" style="margin-top:24px"><span class="mono" style="font-size:10px;color:var(--t3);letter-spacing:2px">SCROLL TO EXPLORE ↓</span></div>
+</div>
+</section>
+
+<div class="marquee"><div class="mq-i"><span>Platform-First</span><span>·</span><span>LLM-Agnostic</span><span>·</span><span>Experience-Designed</span><span>·</span><span>Lean FDE Teams</span><span>·</span><span>Compounding Architecture</span><span>·</span><span>Forward Deployed</span><span>·</span><span>Deloitte Studios Chennai</span><span>·</span><span>Platform-First</span><span>·</span><span>LLM-Agnostic</span><span>·</span><span>Experience-Designed</span><span>·</span><span>Lean FDE Teams</span><span>·</span><span>Compounding Architecture</span><span>·</span><span>Forward Deployed</span><span>·</span><span>Deloitte Studios Chennai</span><span>·</span></div></div>
+
+<!-- ===== PROBLEM ===== -->
+<section id="problem" class="s-xl">
+<div class="orb" style="width:400px;height:400px;background:rgba(244,63,94,0.03);top:15%;right:-5%;animation-delay:-4s"></div>
+<div class="grid-bg" style="opacity:0.5"></div>
+<div class="inner">
+<div class="rv"><span class="label" style="color:var(--rose)">The Problem</span></div>
+<div class="rv d1"><h2>Every enterprise wants AI.<br>Almost none can ship it.</h2></div>
+<div class="rv d2" style="margin-top:20px"><p class="sub" style="max-width:660px">The budgets are approved. The models are powerful enough. The consultants have been hired. Six months later — the pilot is still in a sandbox. The compliance team doesn't trust it. The interface was designed by engineers, for engineers. And the consulting firm is already scoping the next engagement, because the last one didn't stick.</p></div>
+
+<div class="b4 rv d3" style="margin-top:44px">
+<div class="gc gl-r" style="text-align:center"><div class="stat-num" style="font-size:52px;font-weight:700;color:var(--rose)"><span class="ctr" data-target="99">0</span>%</div><div style="font-size:14px;color:var(--t2);margin-top:10px">plan to deploy AI agents</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:8px">KPMG</div></div>
+<div class="gc gl-b" style="text-align:center"><div class="stat-num" style="font-size:52px;font-weight:700;color:var(--blue)"><span class="ctr" data-target="11">0</span>%</div><div style="font-size:14px;color:var(--t2);margin-top:10px">have actually done it</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:8px">Neurons Lab 2026</div></div>
+<div class="gc gl-g" style="text-align:center"><div class="stat-num" style="font-size:52px;font-weight:700;color:var(--green)">$<span class="ctr" data-target="50">0</span>B</div><div style="font-size:14px;color:var(--t2);margin-top:10px">agentic AI spend in 2025</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:8px">KPMG</div></div>
+<div class="gc gl-a" style="text-align:center"><div class="stat-num" style="font-size:52px;font-weight:700;color:var(--amber)"><span class="ctr" data-target="42">0</span>%</div><div style="font-size:14px;color:var(--t2);margin-top:10px">compliance budgets lost to false positives</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:8px">Kore.ai</div></div>
+</div>
+
+<div class="rv d4" style="margin-top:36px"><p style="font-size:15px;color:var(--t2);line-height:1.8">Every failed pilot costs $500K–$2M in sunk investment. Only 25% of AI initiatives deliver expected ROI. Only 16% have scaled enterprise-wide. <span class="mono" style="font-size:9px;color:var(--t3)">IBM CEO Study</span></p></div>
+
+<div class="rv d5" style="margin-top:28px;padding:28px 32px;border-left:2px solid var(--rose);background:var(--rS);border-radius:0 16px 16px 0">
+<p class="serif" style="font-size:21px;font-style:italic;line-height:1.5">The technology isn't the problem. The gap is between powerful AI and the humans who need to use it — and a delivery model that compounds instead of rebuilding every time.</p>
+</div>
+</div>
+</section>
+
+<div class="wave"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,45 C360,85 720,10 1080,55 C1260,75 1380,25 1440,45 L1440,90 L0,90Z" fill="var(--bg2)"/></svg></div>
+
+<!-- ===== INSIGHT ===== -->
+<section id="insight" style="background:var(--bg2)">
+<div class="orb" style="width:350px;height:350px;background:rgba(134,188,37,0.04);top:20%;left:0;animation-delay:-6s"></div>
+<div class="orb" style="width:200px;height:200px;background:rgba(59,125,221,0.03);bottom:15%;right:10%;animation-delay:-10s"></div>
+<div class="inner-sm">
+<div class="rv" style="text-align:center"><span class="label" style="display:inline-block">The Insight</span></div>
+<div class="rv d1" style="text-align:center"><h2>We saw two things<br>everyone else missed.</h2></div>
+
+<div class="b2 rv d2" style="margin-top:36px">
+<div class="gc gl-g" style="padding:32px;border-top:2px solid var(--green)">
+<span class="mono" style="font-size:10px;color:var(--green);letter-spacing:2px">INSIGHT ONE</span>
+<h3 style="margin-top:10px;font-size:20px">AI fails at adoption,<br>not at inference.</h3>
+<p style="font-size:14px;color:var(--t2);margin-top:12px;line-height:1.7">The missing layer is experience design — making AI feel like it belongs in the workflow. Every component needs two inseparable dimensions: <strong style="color:var(--green)">what it does</strong> and <strong style="color:var(--green)">how it feels.</strong></p>
+</div>
+<div class="gc gl-b" style="padding:32px;border-top:2px solid var(--blue)">
+<span class="mono" style="font-size:10px;color:var(--blue);letter-spacing:2px">INSIGHT TWO</span>
+<h3 style="margin-top:10px;font-size:20px">Traditional delivery<br>is fundamentally broken.</h3>
+<p style="font-size:14px;color:var(--t2);margin-top:12px;line-height:1.7">Consulting firms rebuild from scratch, every time. No compounding. No flywheel. We needed an architecture that <strong style="color:var(--blue)">gets smarter with every deployment.</strong></p>
+</div>
+</div>
+
+<div class="rv d3" style="margin-top:40px;text-align:center">
+<p style="font-size:18px;color:var(--t2);line-height:1.8;max-width:600px;margin:0 auto">These insights were born at <strong style="color:var(--text)">Deloitte Studios Chennai</strong> — our team inside the AM&C practice, shaped by years of enterprise delivery. We've watched brilliant technology fail at the point of adoption, again and again.</p>
+</div>
+
+<div class="rv d4" style="margin-top:24px;text-align:center">
+<p style="font-size:20px;line-height:1.7"><span style="color:var(--t2)">So we built something different.</span> <strong style="color:var(--green);font-size:22px">We call it Pockets.</strong></p>
+<p style="font-size:15px;color:var(--t2);margin-top:8px">Forward deployed engineers on a platform that compounds — where function and experience are never shipped separately.</p>
+</div>
+
+<div class="rv d5 gc gl-g" style="margin-top:28px;padding:24px 30px;border-left:2px solid var(--green);background:var(--gG)">
+<p style="font-size:15px;color:var(--t2);line-height:1.7">Deloitte brings decades of industry expertise, global relationships, and enterprise trust. <strong style="color:var(--text)">Pockets adds what was missing</strong> — a platform-first, AI-native, experience-designed delivery engine. Combined, it's a capability no competitor can replicate.</p>
+</div>
+</div>
+</section>
+
+<div class="wave" style="background:var(--bg2)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,35 C480,75 960,15 1440,55 L1440,90 L0,90Z" fill="var(--bg)"/></svg></div>
+
+<!-- ===== ARCHITECTURE ===== -->
+<section id="arch" class="s-xl">
+<div class="grid-bg" style="opacity:0.5"></div>
+<div class="orb" style="width:300px;height:300px;background:rgba(6,182,212,0.03);bottom:20%;right:5%;animation-delay:-5s"></div>
+<div class="inner">
+<div class="rv"><span class="label">The Architecture</span></div>
+<div class="rv d1"><h2>One engine. Infinite configurations.<br>We call it <span style="color:var(--green)">the Sandwich.</span></h2></div>
+<div class="rv d2" style="margin-top:14px"><p class="sub" style="max-width:680px">A modular, scalable architecture designed to grow without friction. New industries are added through configuration-driven knowledge packs — not engineering sprints. New clients onboard through structured configs in days, not months. The base engine evolves continuously, and every improvement flows to every deployment automatically.</p></div>
+<div class="rv d3" style="margin-top:12px"><p style="font-size:14px;color:var(--t3);line-height:1.7;max-width:680px">Traditional consulting builds bespoke solutions for every client. When the engagement ends, so does the value. The Sandwich is different — it's infrastructure that compounds.</p></div>
+
+<div style="display:flex;flex-direction:column;gap:14px;margin-top:40px">
+<div class="rv gc gl-v" style="border-left:3px solid var(--vi);padding:28px 32px">
+<span class="mono" style="font-size:10px;color:var(--vi);letter-spacing:2px">RUNTIME BRAIN</span>
+<h3 style="margin-top:8px;color:var(--vi);font-size:26px">Orchestration Engine</h3>
+<p style="font-size:15px;color:var(--t2);margin-top:12px;line-height:1.7">Assembles the sandwich at runtime. Routes to the right LLM based on client preference, task complexity, or failover needs. Captures learnings from every interaction and feeds them back into the appropriate layer. Manages versioning so clients control when they upgrade.</p>
+<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:5px"><span class="tag" style="color:var(--vi);background:var(--vS)">Prompt Assembly</span><span class="tag" style="color:var(--vi);background:var(--vS)">LLM Routing</span><span class="tag" style="color:var(--vi);background:var(--vS)">Feedback Flywheel</span><span class="tag" style="color:var(--vi);background:var(--vS)">Version Control</span></div>
+</div>
+<div class="rv d1 gc gl-c" style="border-left:3px solid var(--cyan);padding:28px 32px">
+<span class="mono" style="font-size:10px;color:var(--cyan);letter-spacing:2px">LAYER 1 — UNIVERSAL</span>
+<h3 style="margin-top:8px;color:var(--cyan);font-size:26px">Base Layer</h3>
+<p style="font-size:15px;color:var(--t2);margin-top:12px;line-height:1.7">The core IP. Reasoning engine, guardrails, citation and traceability, response framework, audit trail, security and governance, measurement framework, LLM adapters, and integration framework. Every improvement benefits every sector and every client automatically.</p>
+<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:5px"><span class="tag" style="color:var(--cyan);background:var(--cS)">Reasoning</span><span class="tag" style="color:var(--cyan);background:var(--cS)">Guardrails</span><span class="tag" style="color:var(--cyan);background:var(--cS)">Citations</span><span class="tag" style="color:var(--cyan);background:var(--cS)">Audit Trail</span><span class="tag" style="color:var(--cyan);background:var(--cS)">Security</span><span class="tag" style="color:var(--cyan);background:var(--cS)">LLM Adapters</span><span class="tag" style="color:var(--cyan);background:var(--cS)">Measurement</span></div>
+</div>
+<div class="rv d2 gc gl-e" style="border-left:3px solid var(--em);padding:28px 32px">
+<span class="mono" style="font-size:10px;color:var(--em);letter-spacing:2px">LAYER 2 — INDUSTRY</span>
+<h3 style="margin-top:8px;color:var(--em);font-size:26px">Sector Layer</h3>
+<p style="font-size:15px;color:var(--t2);margin-top:12px;line-height:1.7">Swappable domain knowledge packs. Regulations, standards, terminology, industry workflows, compliance calendars, enforcement trends, and experience patterns. New sectors are added in 1–2 weeks through structured content — no engineering sprints required.</p>
+<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:5px"><span class="tag" style="color:var(--em);background:var(--eS)">Regulations</span><span class="tag" style="color:var(--em);background:var(--eS)">Terminology</span><span class="tag" style="color:var(--em);background:var(--eS)">Workflows</span><span class="tag" style="color:var(--em);background:var(--eS)">Calendars</span><span class="tag" style="color:var(--em);background:var(--eS)">Experience Patterns</span></div>
+</div>
+<div class="rv d3 gc gl-a" style="border-left:3px solid var(--amber);padding:28px 32px">
+<span class="mono" style="font-size:10px;color:var(--amber);letter-spacing:2px">LAYER 3 — CUSTOMER</span>
+<h3 style="margin-top:8px;color:var(--amber);font-size:26px">Client Layer</h3>
+<p style="font-size:15px;color:var(--t2);margin-top:12px;line-height:1.7">Per-customer configuration. Organization profile, uploaded documents and policies, system integrations, governance policies, user roles, and experience personalization. Onboarded through structured YAML configs — typically within a single day.</p>
+<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:5px"><span class="tag" style="color:var(--amber);background:var(--aS)">Org Profile</span><span class="tag" style="color:var(--amber);background:var(--aS)">Documents</span><span class="tag" style="color:var(--amber);background:var(--aS)">Integrations</span><span class="tag" style="color:var(--amber);background:var(--aS)">Governance</span><span class="tag" style="color:var(--amber);background:var(--aS)">User Roles</span></div>
+</div>
+</div>
+
+<div class="rv d4" style="margin-top:24px;text-align:center;padding:20px;border-radius:16px;background:var(--gG);border:1px solid rgba(134,188,37,0.07)">
+<span style="font-size:16px;color:var(--green);font-weight:500">1 Base × N Sectors × N Clients = N² Unique Agents</span>
+<div style="font-size:13px;color:var(--t2);margin-top:6px">Example: 1 Base × 5 Sectors × 20 Clients = <strong style="color:var(--text)">100 unique agents</strong> — maintained as <strong style="color:var(--green)">26 configs</strong>, not 100 separate builds</div>
+</div>
+</div>
+</section>
+
+<!-- ===== LLM ===== -->
+<section id="llm" style="background:var(--bg2)">
+<div class="grid-bg" style="opacity:0.3"></div>
+<div class="orb" style="width:300px;height:300px;background:rgba(139,92,246,0.03);top:10%;right:5%;animation-delay:-7s"></div>
+<div class="inner">
+<div class="rv"><span class="label" style="color:var(--vi)">Model Agnostic</span></div>
+<div class="rv d1"><h2>Your cloud. Your models. <span style="color:var(--vi)">Your rules.</span></h2></div>
+<div class="rv d2" style="margin-top:14px"><p class="sub" style="max-width:680px">Enterprise AI vendor lock-in is a massive problem. Banks on Azure want GPT. Healthcare on GCP wants Gemini. Government clients need on-prem open source. A platform locked to one provider disqualifies itself from half the market. Pockets is built to work with all of them — simultaneously.</p></div>
+
+<div class="b3 rv d3" style="margin-top:36px">
+<div class="gc gl-b" style="border-top:2px solid var(--blue);padding:28px"><span class="mono" style="font-size:9px;color:var(--blue);letter-spacing:2px">STRATEGY A</span><h3 style="margin-top:10px">Client Choice</h3><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Enterprise picks their LLM based on existing cloud agreements and data residency. The adapter layer translates — sector and client layers stay completely model-neutral.</p></div>
+<div class="gc gl-v" style="border-top:2px solid var(--vi);padding:28px"><span class="mono" style="font-size:9px;color:var(--vi);letter-spacing:2px">STRATEGY B</span><h3 style="margin-top:10px">Intelligent Routing</h3><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">The platform selects the optimal model per task. Complex regulatory reasoning routes to the most capable. Simple lookups go to faster, cheaper alternatives. Cost and quality balanced automatically.</p></div>
+<div class="gc gl-e" style="border-top:2px solid var(--em);padding:28px"><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">STRATEGY C</span><h3 style="margin-top:10px">Resilience</h3><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">No single provider dependency. If the primary model is unavailable, automatic failover routes to a secondary without disruption. Performance monitoring runs continuously across all providers.</p></div>
+</div>
+
+<div class="rv d4" style="margin-top:44px">
+<span class="mono" style="font-size:10px;color:var(--green);letter-spacing:2px">PROMPT ASSEMBLY FLOW</span>
+<p style="font-size:13px;color:var(--t3);margin-top:6px;margin-bottom:20px">This entire flow executes in seconds. What would take a compliance analyst days of manual research happens in a single query.</p>
+<div class="pipe-track" id="pt">
+<div class="pipe-bg"></div>
+<div class="pipe-ln" id="pl"></div>
+<div class="ps lit" data-i="0"><span class="pn">01</span><strong class="ps-t" style="font-size:15px">Request</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">A compliance officer submits a natural language query — "Are we compliant with the new OCC guidance on third-party risk management?"</p></div>
+<div class="ps" data-i="1"><span class="pn">02</span><strong class="ps-t" style="font-size:15px">Context</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">The engine resolves who's asking: their institution's config, applicable sector pack, user role, permission level. Prior interactions inform context.</p></div>
+<div class="ps" data-i="2"><span class="pn">03</span><strong class="ps-t" style="font-size:15px">Assemble</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">Three layers merge into one prompt: base reasoning (obligation extraction, gap analysis, citation logic) + sector knowledge (OCC guidance, FFIEC frameworks) + client context (their vendor list, prior findings).</p></div>
+<div class="ps" data-i="3"><span class="pn">04</span><strong class="ps-t" style="font-size:15px">Route</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">The orchestration engine selects the optimal LLM — client's preferred model (Strategy A), best for regulatory reasoning (Strategy B), or available fallback (Strategy C).</p></div>
+<div class="ps" data-i="4"><span class="pn">05</span><strong class="ps-t" style="font-size:15px">Adapt</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">The assembled prompt is formatted for the target model's specific API, context window limits, and prompting patterns. Model-specific reasoning variants activate.</p></div>
+<div class="ps" data-i="5"><span class="pn">06</span><strong class="ps-t" style="font-size:15px">Respond</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">Output includes cited regulatory sources (specific OCC bulletin sections), COMPLIANT/GAP/MISSING scoring, severity-ranked findings, and remediation recommendations — formatted for the user's role.</p></div>
+<div class="ps" data-i="6"><span class="pn">07</span><strong class="ps-t" style="font-size:15px">Learn</strong><p style="font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6">Interaction data flows back: reasoning effectiveness to the base layer, new regulatory references to the sector pack, usage patterns to the client config. The platform improves with every query.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== TEAM ===== -->
+<section id="team" class="s-xl">
+<div class="grid-bg" style="opacity:0.3"></div>
+<div class="orb" style="width:280px;height:280px;background:rgba(244,63,94,0.03);bottom:10%;right:0;animation-delay:-3s"></div>
+<div class="inner">
+<div class="rv"><span class="label" style="color:var(--rose)">The Human Layer</span></div>
+<div class="rv d1"><h2>We don't send an army.<br>We send a <span style="color:var(--rose)">Pocket.</span></h2></div>
+<div class="rv d2" style="margin-top:14px"><p class="sub" style="max-width:680px">A typical consulting engagement deploys 8–12 people over 6–12 months. A Pocket deploys 3 people and delivers a working agent in 2–4 weeks. The difference isn't just cost — it's architecture. The sandwich does what those extra 9 people used to do.</p></div>
+
+<div class="b3 rv d3" style="margin-top:36px">
+<div class="gc gl-b" style="border-top:2px solid var(--blue);padding:28px"><span style="font-size:12px;font-weight:600;color:var(--blue)">[PM Role]</span><h3 style="margin-top:8px">AI Product Manager</h3><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Owns the engagement end-to-end. Bridges business problems to technical solutions. Decides which sandwich layers to activate and how.</p><div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:4px"><span class="tag" style="color:var(--blue);background:var(--bS)">Strategy</span><span class="tag" style="color:var(--blue);background:var(--bS)">Client Relations</span><span class="tag" style="color:var(--blue);background:var(--bS)">AI Fluency</span></div></div>
+<div class="gc gl-a" style="border-top:2px solid var(--amber);padding:28px"><span style="font-size:12px;font-weight:600;color:var(--amber)">Non-Negotiable</span><h3 style="margin-top:8px">Experience Designer</h3><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Fuses function and experience from day one. Not decoration — architecture. The person who ensures AI feels native to the client's workflow.</p><div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:4px"><span class="tag" style="color:var(--amber);background:var(--aS)">UX/AX Design</span><span class="tag" style="color:var(--amber);background:var(--aS)">AI Interaction</span><span class="tag" style="color:var(--amber);background:var(--aS)">Research</span></div></div>
+<div class="gc gl-e" style="border-top:2px solid var(--em);padding:28px"><span style="font-size:12px;font-weight:600;color:var(--em)">Flexible Composition</span><h3 style="margin-top:8px">The Builders</h3><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Frontend, backend, AI/agents. Composition flexes with each engagement. They configure and extend the sandwich — they don't build from scratch.</p><div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:4px"><span class="tag" style="color:var(--em);background:var(--eS)">Frontend</span><span class="tag" style="color:var(--em);background:var(--eS)">Backend</span><span class="tag" style="color:var(--em);background:var(--eS)">AI/Agents</span></div></div>
+</div>
+
+<!-- Comparison strip -->
+<div class="vs-grid rv d4">
+<div class="vs-col" style="background:var(--rS)"><h4 style="color:var(--rose)">Traditional Consulting</h4><div class="vs-item">8–12 people per engagement</div><div class="vs-item">6–12 month delivery</div><div class="vs-item">Custom build every time</div><div class="vs-item">Consulting margins (~30%)</div><div class="vs-item" style="border:none">Knowledge walks out the door</div></div>
+<div class="vs-col" style="background:var(--gG)"><h4 style="color:var(--green)">Pockets</h4><div class="vs-item">3 people per Pocket</div><div class="vs-item">2–4 week first delivery</div><div class="vs-item">Platform compounds every time</div><div class="vs-item">Software margins (70–90%)</div><div class="vs-item" style="border:none">Knowledge feeds the flywheel</div></div>
+</div>
+
+<div class="rv d5 gc" style="padding:18px 28px"><p style="font-size:14px;color:var(--t2)"><strong style="color:var(--green)">FDE postings grew 800% in 2025.</strong> Palantir, OpenAI, Anthropic, Salesforce — everyone is building forward deployed teams. Pockets is Deloitte's answer: platform-first, experience-designed, lean by architecture. <span class="mono" style="font-size:9px;color:var(--t3)">Financial Times · Indeed</span></p></div>
+<div class="rv d6 gc" style="padding:18px 28px;margin-top:8px;background:var(--rS);border:1px solid rgba(244,63,94,0.05)"><p style="font-size:14px;color:var(--t2)"><strong style="color:var(--text)">Scaling path:</strong> Pilot (hands-on, 1 Pocket) → Growth (new PMs trained, 2–4 Pockets) → Scale (strategic governance, 5+ Pockets running in parallel)</p></div>
+</div>
+</section>
+
+<!-- ===== GOVERNANCE ===== -->
+<section id="gov" style="background:var(--bg2)">
+<div class="grid-bg" style="opacity:0.3"></div>
+<div class="orb" style="width:300px;height:300px;background:rgba(16,185,129,0.03);top:15%;left:3%;animation-delay:-9s"></div>
+<div class="inner">
+<div class="rv"><span class="label" style="color:var(--em)">How It Works</span></div>
+<div class="rv d1"><h2>One sandwich. Every governance<br>challenge <span style="color:var(--em)">in finance.</span></h2></div>
+<div class="rv d2" style="margin-top:14px"><p class="sub" style="max-width:700px">It's 7:45 AM. A compliance officer at a $4B regional bank sits down with a problem. The OCC just released new guidance on AI model governance — and the BSA exam is in 6 weeks. She opens the platform: <em style="color:var(--text)">"What gaps do we have against the new OCC AI guidance, and what should I prioritize before the exam?"</em></p></div>
+<div class="rv d3" style="margin-top:8px"><p style="font-size:15px;color:var(--t2)">Here's what happens in the next <strong style="color:var(--em)">8 seconds.</strong></p></div>
+
+<div class="rv d3 gtab"><button class="ac" onclick="setG(0,this)">AML/KYC Monitoring</button><button onclick="setG(1,this)">Regulatory Change</button><button onclick="setG(2,this)">Exam Readiness</button><button onclick="setG(3,this)">AI Model Governance</button></div>
+
+<div id="g0" class="gp ac">
+<div class="gc gl-c" style="border-left:3px solid var(--cyan);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--cyan);letter-spacing:2px">BASE ACTIVATES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Transaction pattern analysis. Risk scoring engine. Alert triage and false positive reduction logic. Evidence-based citation for every flagged transaction. Severity-ranked findings.</p></div>
+<div class="gc gl-e" style="border-left:3px solid var(--em);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">SECTOR LOADS</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">BSA/AML regulations. FinCEN SAR filing requirements. OFAC sanctions lists. FATF risk indicators. State money transmitter laws. Beneficial ownership rules under CTA.</p></div>
+<div class="gc gl-a" style="border-left:3px solid var(--amber);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--amber);letter-spacing:2px">CLIENT CONFIGURES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Institution's risk appetite thresholds. Customer segmentation rules. Prior BSA exam findings and MRAs. Internal escalation policies. Existing transaction monitoring integrations.</p></div>
+</div>
+<div id="g1" class="gp">
+<div class="gc gl-c" style="border-left:3px solid var(--cyan);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--cyan);letter-spacing:2px">BASE ACTIVATES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Regulatory document comparison reasoning. Change impact analysis. Obligation extraction from new rules. Gap identification against current controls. Deadline tracking logic.</p></div>
+<div class="gc gl-e" style="border-left:3px solid var(--em);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">SECTOR LOADS</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Federal Register feed. OCC bulletins. CFPB guidance. SEC rule proposals. State banking department updates. Cross-jurisdiction conflict detection rules.</p></div>
+<div class="gc gl-a" style="border-left:3px solid var(--amber);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--amber);letter-spacing:2px">CLIENT CONFIGURES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Operating jurisdictions. Current policy library. Regulatory relationship map. Internal compliance calendar. Stakeholder notification preferences.</p></div>
+</div>
+<div id="g2" class="gp">
+<div class="gc gl-c" style="border-left:3px solid var(--cyan);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--cyan);letter-spacing:2px">BASE ACTIVATES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Systematic audit reasoning. Control testing methodology. COMPLIANT / GAP / MISSING severity scoring. Remediation prioritization. Evidence collection and citation framework.</p></div>
+<div class="gc gl-e" style="border-left:3px solid var(--em);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">SECTOR LOADS</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">OCC and FDIC examination procedures. FFIEC handbooks. State DOB exam checklists. Common findings database. Enforcement action patterns by regulator.</p></div>
+<div class="gc gl-a" style="border-left:3px solid var(--amber);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--amber);letter-spacing:2px">CLIENT CONFIGURES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">Prior exam findings and MRAs. Remediation status tracking. Internal audit schedule. Board reporting templates. Primary examiner relationship context.</p></div>
+</div>
+<div id="g3" class="gp">
+<div class="gc gl-c" style="border-left:3px solid var(--cyan);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--cyan);letter-spacing:2px">BASE ACTIVATES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">AI system inventory analysis. Bias detection reasoning. Model risk assessment methodology. Documentation completeness checking. Governance framework gap identification.</p></div>
+<div class="gc gl-e" style="border-left:3px solid var(--em);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">SECTOR LOADS</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">SR 11-7 Model Risk Management. EU AI Act high-risk classification. NIST AI RMF. Colorado SB 21-169. Fair lending and proxy discrimination guidance. OCC AI expectations.</p></div>
+<div class="gc gl-a" style="border-left:3px solid var(--amber);padding:24px 28px"><span class="mono" style="font-size:9px;color:var(--amber);letter-spacing:2px">CLIENT CONFIGURES</span><p style="font-size:14px;color:var(--t2);margin-top:10px;line-height:1.7">AI/ML model inventory with metadata. Third-party vendor list. AI governance committee structure. Existing bias testing procedures. Model validation schedule.</p></div>
+</div>
+
+<div class="rv d4" style="margin-top:22px;text-align:center;padding:20px;border-radius:16px;background:var(--eS);border:1px solid rgba(16,185,129,0.06)"><span style="font-size:16px;color:var(--em);font-weight:500">Same engine. Same architecture. Four governance outcomes. The layers adapt — the platform never rebuilds.</span></div>
+</div>
+</section>
+
+<div class="wave" style="background:var(--bg2)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,50 C360,15 720,80 1080,35 C1260,20 1380,55 1440,40 L1440,90 L0,90Z" fill="var(--bg)"/></svg></div>
+
+<!-- ===== MARKET ===== -->
+<section id="opp" class="s-xl">
+<div class="grid-bg" style="opacity:0.4"></div>
+<div class="orb" style="width:350px;height:350px;background:rgba(229,168,75,0.03);bottom:10%;left:5%;animation-delay:-5s"></div>
+<div class="inner">
+<div class="rv"><span class="label">The Opportunity</span></div>
+<div class="rv d1"><h2>The window is now.<br>The market is <span style="color:var(--rose)">88% unserved.</span></h2></div>
+<div class="rv d2" style="margin-top:14px"><p class="sub" style="max-width:680px">Finance institutions are moving from experimentation to production in 2026. First movers gain a 4% ROTE advantage — a key profitability metric. Slow movers get stuck with uncompetitive cost bases. The ones who deploy AI compliance agents first will set the standard — and the switching costs — for everyone else. <span class="mono" style="font-size:9px;color:var(--t3)">McKinsey via Neurons Lab</span></p></div>
+
+<div class="b4 rv d3" style="margin-top:36px">
+<div class="gc gl-g" style="text-align:center"><div class="stat-num" style="font-size:44px;font-weight:700;color:var(--green)"><span class="ctr" data-target="600">0</span>%+</div><div style="font-size:14px;color:var(--t2);margin-top:8px">finance AI adoption growth</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:6px">Wolters Kluwer</div></div>
+<div class="gc gl-b" style="text-align:center"><div class="stat-num" style="font-size:44px;font-weight:700;color:var(--blue)"><span class="ctr" data-target="70">0</span>%+</div><div style="font-size:14px;color:var(--t2);margin-top:8px">Tier-1 banks increasing AI budgets</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:6px">SAS</div></div>
+<div class="gc gl-a" style="text-align:center"><div class="stat-num" style="font-size:44px;font-weight:700;color:var(--amber)">$<span class="ctr" data-target="2">0</span>M</div><div style="font-size:14px;color:var(--t2);margin-top:8px">avg regulatory exam cost</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:6px">Industry estimate</div></div>
+<div class="gc gl-r" style="text-align:center"><div style="font-family:Sora,sans-serif;font-size:44px;font-weight:700;color:var(--rose)">3.5×</div><div style="font-size:14px;color:var(--t2);margin-top:8px">avg enterprise AI ROI in 24 months</div><div class="mono" style="font-size:9px;color:var(--t3);margin-top:6px">Digital Applied</div></div>
+</div>
+
+<div class="rv d4" style="margin-top:32px"><span class="mono" style="font-size:10px;color:var(--rose);letter-spacing:2px">USE CASES BY PAIN SCORE</span></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+<div class="rv gc gl-r" style="display:flex;justify-content:space-between;align-items:center;padding:22px 28px"><div><h3 style="font-size:18px">AML/KYC Compliance Monitoring</h3><span style="font-size:13px;color:var(--t3)">Target: CCO, BSA Officer — 70%+ banks increasing AML budgets</span></div><span style="font-family:Sora,sans-serif;font-size:32px;font-weight:700;color:var(--rose)">10/10</span></div>
+<div class="rv d1 gc" style="display:flex;justify-content:space-between;align-items:center;padding:22px 28px"><div><h3 style="font-size:18px">Regulatory Change Management</h3><span style="font-size:13px;color:var(--t3)">Target: CCO — manual tracking across jurisdictions is impossible at scale</span></div><span style="font-family:Sora,sans-serif;font-size:32px;font-weight:700;color:var(--rose)">9/10</span></div>
+<div class="rv d2 gc" style="display:flex;justify-content:space-between;align-items:center;padding:22px 28px"><div><h3 style="font-size:18px">Exam Readiness & Audit Prep</h3><span style="font-size:13px;color:var(--t3)">Target: Head of Audit — exams cost $500K–$2M in staff time</span></div><span style="font-family:Sora,sans-serif;font-size:32px;font-weight:700;color:var(--rose)">9/10</span></div>
+<div class="rv d3 gc" style="display:flex;justify-content:space-between;align-items:center;padding:22px 28px"><div><h3 style="font-size:18px">Loan Processing Compliance</h3><span style="font-size:13px;color:var(--t3)">Target: VP Lending — 20+ manual steps, fair lending violations carry massive penalties</span></div><span style="font-family:Sora,sans-serif;font-size:32px;font-weight:700;color:var(--amber)">8/10</span></div>
+</div>
+</div>
+</section>
+
+<!-- ===== GTM ===== -->
+<section id="gtm" style="background:var(--bg2)">
+<div class="grid-bg" style="opacity:0.3"></div>
+<div class="orb" style="width:280px;height:280px;background:rgba(134,188,37,0.03);bottom:15%;right:5%;animation-delay:-4s"></div>
+<div class="inner">
+<div class="rv"><span class="label">The Plan</span></div>
+<div class="rv d1"><h2>Prove fast. <span style="color:var(--green)">Scale smart.</span></h2></div>
+<div class="rv d2" style="margin-top:24px;padding:28px 32px;border-left:2px solid var(--green);background:var(--gG);border-radius:0 16px 16px 0">
+<p class="serif" style="font-size:21px;font-style:italic;line-height:1.5">The traditional sales cycle: 6–12 months of demos on fake data and procurement reviews. Our approach: 2 weeks on real data, real regulations, real problems. At the end, the question isn't "should we buy this?" — it's "can we keep it running?"</p>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px;margin-top:32px">
+<div class="rv gc" style="display:flex;align-items:center;gap:14px;padding:18px 24px"><span class="mono" style="color:var(--em);font-size:13px;font-weight:600;min-width:24px">01</span><div><strong style="font-size:15px">Signal Detection</strong> <span style="color:var(--t3);font-size:14px">— identify institutions with acute compliance pain</span></div></div>
+<div class="rv d1 gc" style="display:flex;align-items:center;gap:14px;padding:18px 24px"><span class="mono" style="color:var(--em);font-size:13px;font-weight:600;min-width:24px">02</span><div><strong style="font-size:15px">Executive Introduction</strong> <span style="color:var(--t3);font-size:14px">— lead with regulatory insight, not a product pitch</span></div></div>
+<div class="rv d2 gc gl-g" style="display:flex;align-items:center;gap:14px;padding:18px 24px;background:var(--gG);border:1px solid rgba(134,188,37,0.1)"><span class="mono" style="color:var(--green);font-size:13px;font-weight:700;min-width:24px">03</span><div><strong style="font-size:15px;color:var(--green)">Compliance Bootcamp</strong> <span style="font-size:13px;color:var(--green)">— 2 weeks, real data, working agent — the key differentiator</span></div></div>
+<div class="rv d3 gc" style="display:flex;align-items:center;gap:14px;padding:18px 24px"><span class="mono" style="color:var(--amber);font-size:13px;font-weight:600;min-width:24px">04</span><div><strong style="font-size:15px">Results → Pilot → Expand → Embed</strong> <span style="color:var(--t3);font-size:14px">— from proof to long-term partnership</span></div></div>
+</div>
+
+<div class="rv d4" style="margin-top:12px"><p style="font-size:13px;color:var(--t3)">Pilot-first strategies achieve positive ROI in 6–9 months vs. 18–24 for full-scale deployments. <span class="mono" style="font-size:9px">Digital Applied Research</span></p></div>
+
+<div class="b4 rv d5" style="margin-top:28px">
+<div class="gc" style="padding:22px;text-align:center;border-top:2px solid var(--t4)"><span style="font-size:13px;font-weight:600">Bootcamp</span><div style="font-family:Sora,sans-serif;font-size:22px;font-weight:700;color:var(--green);margin:8px 0">Free–$15K</div><span style="font-size:11px;color:var(--t3)">Acquisition</span></div>
+<div class="gc" style="padding:22px;text-align:center;border-top:2px solid var(--em)"><span style="font-size:13px;font-weight:600">Pilot</span><div style="font-family:Sora,sans-serif;font-size:22px;font-weight:700;color:var(--green);margin:8px 0">$15–40K/mo</div><span style="font-size:11px;color:var(--t3)">~50% margin</span></div>
+<div class="gc" style="padding:22px;text-align:center;border-top:2px solid var(--vi)"><span style="font-size:13px;font-weight:600">Enterprise</span><div style="font-family:Sora,sans-serif;font-size:22px;font-weight:700;color:var(--green);margin:8px 0">$30–80K/mo</div><span style="font-size:11px;color:var(--t3)">~75% margin</span></div>
+<div class="gc gl-g" style="padding:22px;text-align:center;border-top:2px solid var(--green)"><span style="font-size:13px;font-weight:600">Platform</span><div style="font-family:Sora,sans-serif;font-size:22px;font-weight:700;color:var(--green);margin:8px 0">$5–25K/mo</div><span style="font-size:11px;color:var(--t3)">~90%+ margin</span></div>
+</div>
+
+<div class="b4 rv d6" style="margin-top:12px">
+<div class="gc" style="padding:18px;text-align:center"><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">PHASE 1</span><div class="serif" style="font-size:20px;margin:6px 0">Prove</div><span style="font-size:12px;color:var(--t3)">M 1–3</span></div>
+<div class="gc" style="padding:18px;text-align:center"><span class="mono" style="font-size:9px;color:var(--amber);letter-spacing:2px">PHASE 2</span><div class="serif" style="font-size:20px;margin:6px 0">Productize</div><span style="font-size:12px;color:var(--t3)">M 4–6</span></div>
+<div class="gc" style="padding:18px;text-align:center"><span class="mono" style="font-size:9px;color:var(--vi);letter-spacing:2px">PHASE 3</span><div class="serif" style="font-size:20px;margin:6px 0">Scale</div><span style="font-size:12px;color:var(--t3)">M 7–12</span></div>
+<div class="gc" style="padding:18px;text-align:center"><span class="mono" style="font-size:9px;color:var(--rose);letter-spacing:2px">PHASE 4</span><div class="serif" style="font-size:20px;margin:6px 0">Platform</div><span style="font-size:12px;color:var(--t3)">Year 2+</span></div>
+</div>
+</div>
+</section>
+
+<div class="wave" style="background:var(--bg2)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,40 C480,75 960,20 1440,55 L1440,90 L0,90Z" fill="var(--bg)"/></svg></div>
+
+<!-- ===== EDGE ===== -->
+<section id="edge" class="s-xl">
+<div class="grid-bg" style="opacity:0.4"></div>
+<div class="orb" style="width:300px;height:300px;background:rgba(134,188,37,0.03);top:10%;left:5%;animation-delay:-7s"></div>
+<div class="inner">
+<div class="rv"><span class="label" style="color:var(--amber)">The Edge</span></div>
+<div class="rv d1"><h2>Built on Deloitte's foundation.<br><span style="color:var(--green)">Designed to outperform.</span></h2></div>
+
+<div class="rv d2 gc gl-g" style="margin-top:28px;padding:28px 32px;border-left:3px solid var(--green)">
+<span class="mono" style="font-size:10px;color:var(--green);letter-spacing:2px">DELOITTE ADVANTAGE</span>
+<p style="font-size:16px;margin-top:12px;line-height:1.7;color:var(--t2)">Other firms are building FDE capabilities from scratch. We're not starting from zero. Deloitte Studios Chennai brings decades of enterprise delivery, global industry relationships, and Big Four trust — now combined with a platform architecture purpose-built for AI-native delivery. <strong style="color:var(--green)">Pockets isn't competing with Deloitte. Pockets IS Deloitte's next evolution.</strong></p>
+</div>
+
+<div class="b2 rv d3" style="margin-top:16px">
+<div class="gc ccard gl-b" style="border-left:3px solid #1E293B;padding:24px 28px"><span style="font-size:11px;font-weight:600;color:var(--t3)">vs</span><h3 style="margin-top:6px">Palantir</h3><p style="font-size:13px;color:var(--t3);margin-top:8px">Complex UX built for engineers. $238K+ average TC per FDE. Locked to their own platform. <span class="mono" style="font-size:8px">Hashnode · Everest Group</span></p><div class="c-edge" style="margin-top:12px;padding:14px;border-radius:10px;background:var(--gG)"><p style="font-size:13px;color:var(--green);font-weight:500;line-height:1.5">Experience-designed for business users. Lower deployment cost. LLM-agnostic. Purpose-built for regulated industries.</p></div></div>
+<div class="gc ccard gl-b" style="border-left:3px solid #00A1E0;padding:24px 28px"><span style="font-size:11px;font-weight:600;color:var(--t3)">vs</span><h3 style="margin-top:6px">Salesforce / Oracle / ServiceNow</h3><p style="font-size:13px;color:var(--t3);margin-top:8px">Ecosystem lock-in. Not LLM-agnostic. AI capabilities are bolt-ons to existing platforms. <span class="mono" style="font-size:8px">Constellation Research</span></p><div class="c-edge" style="margin-top:12px;padding:14px;border-radius:10px;background:var(--gG)"><p style="font-size:13px;color:var(--green);font-weight:500;line-height:1.5">Works with what the client already has. No vendor lock-in. Native compliance reasoning, not generic agents.</p></div></div>
+<div class="gc ccard gl-v" style="border-left:3px solid var(--vi);padding:24px 28px"><span style="font-size:11px;font-weight:600;color:var(--t3)">vs</span><h3 style="margin-top:6px">AI Consulting Startups</h3><p style="font-size:13px;color:var(--t3);margin-top:8px">No reusable platform — custom every time. No experience design discipline. Can't scale beyond the founding team.</p><div class="c-edge" style="margin-top:12px;padding:14px;border-radius:10px;background:var(--gG)"><p style="font-size:13px;color:var(--green);font-weight:500;line-height:1.5">Sandwich architecture compounds. XD embedded from day one. Deloitte scale and trust behind it.</p></div></div>
+<div class="gc" style="padding:24px 28px;display:flex;flex-direction:column;justify-content:center">
+<p style="font-size:15px;color:var(--t2);line-height:1.7"><strong style="color:var(--text)">66% of organizations</strong> report productivity gains from enterprise AI. But only <strong style="color:var(--rose)">15%</strong> report positive profitability impact. The gap is delivery and adoption — exactly what Pockets is built to close.</p>
+<p class="mono" style="font-size:9px;color:var(--t3);margin-top:8px">Deloitte State of AI 2026 · Forrester</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== FLYWHEEL ===== -->
+<section id="fly" style="background:var(--bg2)">
+<div class="grid-bg" style="opacity:0.3"></div>
+<div class="orb" style="width:350px;height:350px;background:rgba(139,92,246,0.03);top:20%;right:5%;animation-delay:-6s"></div>
+<div class="inner">
+<div class="rv"><span class="label" style="color:var(--vi)">The Flywheel</span></div>
+<div class="rv d1"><h2>Each sector makes the engine stronger.<br><span style="color:var(--vi)">The flywheel never stops.</span></h2></div>
+<div class="rv d2" style="margin-top:14px"><p class="sub" style="max-width:680px">When we build the finance sector pack, the base engine's reasoning patterns are validated across real regulatory scenarios. When healthcare comes online, it inherits those hardened patterns — and adds its own. By the time we reach insurance, the engine has been shaped by two industries of real-world compliance reasoning. Each sector doesn't just add revenue. It makes every other sector's agents better.</p></div>
+
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:36px">
+<div class="rv gc gl-e" style="border-left:4px solid var(--em);padding:24px 28px;display:flex;justify-content:space-between;align-items:center"><div><span class="mono" style="font-size:9px;color:var(--em);letter-spacing:2px">NOW</span><h3 style="margin-top:6px">Financial Services</h3><span style="font-size:13px;color:var(--t3)">AML/KYC · Regulatory Change · Exam Readiness · Loan Compliance</span></div><span class="mono" style="font-size:14px;color:var(--em);font-weight:600">$240K–$1M Y1</span></div>
+<div class="rv d1 gc gl-a" style="border-left:4px solid var(--amber);padding:24px 28px;display:flex;justify-content:space-between;align-items:center"><div><span class="mono" style="font-size:9px;color:var(--amber);letter-spacing:2px">MONTH 6–9</span><h3 style="margin-top:6px">Healthcare</h3><span style="font-size:13px;color:var(--t3)">HIPAA · Clinical Trial Regulatory · AI Governance · Data Privacy</span></div><span class="mono" style="font-size:14px;color:var(--amber);font-weight:600">$400K–$1.5M Y2</span></div>
+<div class="rv d2 gc gl-v" style="border-left:4px solid var(--vi);padding:24px 28px;display:flex;justify-content:space-between;align-items:center"><div><span class="mono" style="font-size:9px;color:var(--vi);letter-spacing:2px">MONTH 9–12</span><h3 style="margin-top:6px">Insurance</h3><span style="font-size:13px;color:var(--t3)">Claims Compliance · Market Conduct · AI/ML Governance · Rate Filing</span></div><span class="mono" style="font-size:14px;color:var(--vi);font-weight:600">$300K–$1M Y2</span></div>
+<div class="rv d3 gc gl-r" style="border-left:4px solid var(--rose);padding:24px 28px;display:flex;justify-content:space-between;align-items:center"><div><span class="mono" style="font-size:9px;color:var(--rose);letter-spacing:2px">YEAR 2+</span><h3 style="margin-top:6px">Energy & Utilities</h3><span style="font-size:13px;color:var(--t3)">NERC · ESG Reporting · Environmental · Safety Compliance</span></div><span class="mono" style="font-size:14px;color:var(--rose);font-weight:600">TBD</span></div>
+</div>
+
+<div class="rv d4" style="margin-top:20px;text-align:center;padding:18px;border-radius:16px;background:var(--gG);border:1px solid rgba(134,188,37,0.06)"><span class="mono" style="font-size:12px;color:var(--green);font-weight:500;letter-spacing:1px">M3 $60–120K → M6 $240–480K → M12 $720K–1.2M → M24 $2M–4M ARR</span></div>
+</div>
+</section>
+
+<div class="wave" style="background:var(--bg2)"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,55 C360,20 720,75 1080,30 C1260,15 1380,50 1440,35 L1440,90 L0,90Z" fill="var(--bg)"/></svg></div>
+
+<!-- ===== CLOSE ===== -->
+<section class="s-xl" style="min-height:80vh;display:flex;align-items:center">
+<div class="grid-bg" style="opacity:0.3"></div>
+<div class="orb" style="width:500px;height:500px;background:rgba(134,188,37,0.025);top:20%;left:25%;animation-delay:-3s"></div>
+<div class="orb" style="width:200px;height:200px;background:rgba(59,125,221,0.03);bottom:20%;right:15%;animation-delay:-9s"></div>
+<div class="inner" style="text-align:center">
+<div class="rv"><p style="font-size:16px;color:var(--t2);margin-bottom:24px">Born at Deloitte Studios Chennai. Built for the enterprises that need it most. Ready to scale.</p></div>
+<div class="rv d1"><span class="serif" style="font-size:clamp(40px,6vw,68px);display:block;line-height:1.25">Build the platform.</span></div>
+<div class="rv d3"><span class="serif" style="font-size:clamp(40px,6vw,68px);display:block;line-height:1.25;color:var(--rose)">Deploy the Pockets.</span></div>
+<div class="rv d5"><span class="serif" style="font-size:clamp(40px,6vw,68px);display:block;line-height:1.25;color:var(--green)">Scale the sandwich.</span></div>
+<div class="rv d6" style="margin-top:48px"><div style="width:48px;height:2.5px;background:var(--green);margin:0 auto 20px;border-radius:2px"></div><p class="serif" style="font-size:18px;color:var(--t2);font-style:italic">Function + Experience = Inseparable</p></div>
+<div class="rv d7" style="margin-top:28px"><span class="mono" style="font-size:10px;color:var(--t3);letter-spacing:2px">AN INITIATIVE BY DELOITTE STUDIOS CHENNAI · AM&C PRACTICE</span></div>
+</div>
+</section>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting)n.target.classList.add('v')})},{threshold:0.05,rootMargin:'0px 0px -15px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+const cobs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting&&!n.target.dataset.done){n.target.dataset.done='1';const t=+n.target.dataset.target;let c=0;const d=Math.max(1,Math.floor(t/45));const iv=setInterval(()=>{c+=d;if(c>=t){c=t;clearInterval(iv)}n.target.textContent=c},28)}})},{threshold:0.4});
+document.querySelectorAll('.ctr').forEach(el=>cobs.observe(el));
+
+document.querySelectorAll('.fn').forEach(f=>{f.onclick=()=>document.getElementById(f.dataset.s).scrollIntoView({behavior:'smooth'})});
+const nobs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting)document.querySelectorAll('.fn').forEach(f=>f.classList.toggle('ac',f.dataset.s===n.target.id))})},{threshold:0.2});
+document.querySelectorAll('section[id]').forEach(s=>nobs.observe(s));
+
+window.addEventListener('scroll',()=>{document.getElementById('prog').style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight))*100+'%'});
+
+// Pipeline scroll
+const pt=document.getElementById('pt'),pl=document.getElementById('pl'),pss=pt?pt.querySelectorAll('.ps'):[];
+if(pt){window.addEventListener('scroll',()=>{const r=pt.getBoundingClientRect(),h=pt.offsetHeight;const p=Math.max(0,Math.min(1,(window.innerHeight*0.55-r.top)/h));const a=Math.min(pss.length-1,Math.floor(p*pss.length));pss.forEach((s,i)=>s.classList.toggle('lit',i<=a));pl.style.height=Math.min(100,p*108)+'%'})}
+
+function setG(i,b){document.querySelectorAll('.gtab button').forEach(t=>t.classList.remove('ac'));b.classList.add('ac');for(let j=0;j<4;j++)document.getElementById('g'+j).classList.toggle('ac',j===i)}
+
+let ax,mp,playing=false;
+function toggleM(){const b=document.getElementById('mbtn');if(!ax){ax=new(window.AudioContext||window.webkitAudioContext)();mp=ax.createGain();mp.gain.value=0;mp.connect(ax.destination);[130.81,164.81,196,246.94].forEach((f,i)=>{const o=ax.createOscillator(),g=ax.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0.035-i*0.005;o.connect(g);g.connect(mp);o.start()});const s=ax.createOscillator(),sg=ax.createGain();s.type='sine';s.frequency.value=65.41;sg.gain.value=0.02;s.connect(sg);sg.connect(mp);s.start();const l=ax.createOscillator(),lg=ax.createGain();l.type='sine';l.frequency.value=0.04;lg.gain.value=0.005;l.connect(lg);lg.connect(mp.gain);l.start()}if(!playing){ax.resume();mp.gain.linearRampToValueAtTime(0.18,ax.currentTime+2);b.classList.add('on');b.textContent='♫';playing=true}else{mp.gain.linearRampToValueAtTime(0,ax.currentTime+1);b.classList.remove('on');b.textContent='♪';playing=false}}
+</script>
+</body>
+</html>
