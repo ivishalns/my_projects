@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SDLC Factory | Definitive Technical Proposal v2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #010409;
+            --primary-glow: #00BFFF; /* DeepSkyBlue */
+            --secondary-glow: #9370DB; /* MediumPurple */
+            --text-color: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: rgba(139, 148, 158, 0.2);
+            --card-bg: #0d1117;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding-left: 60px; /* Space for side nav */
+        }
+        .grid-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(to right, var(--border-color) 1px, transparent 1px);
+            background-size: 30px 30px; opacity: 0.5; z-index: -1;
+        }
+        .side-nav {
+            position: fixed; left: 0; top: 0; height: 100%; width: 60px;
+            background-color: var(--card-bg); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .nav-link { color: var(--text-muted); font-size: 1.5rem; margin: 18px 0; transition: all 0.3s ease; position: relative; }
+        .nav-link:hover, .nav-link.active { color: var(--primary-glow); text-shadow: 0 0 15px var(--primary-glow); }
+        .nav-link .tooltip {
+            visibility: hidden; width: 180px; background-color: var(--primary-glow); color: #010409;
+            text-align: center; border-radius: 6px; padding: 5px 0; position: absolute;
+            z-index: 1; left: 125%; top: 50%; transform: translateY(-50%); opacity: 0;
+            transition: opacity 0.3s; font-family: 'Orbitron', sans-serif; font-size: 0.8rem;
+        }
+        .nav-link:hover .tooltip { visibility: visible; opacity: 1; }
+        main { padding: 0 4rem; }
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; border-bottom: 1px solid var(--border-color);
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 4.5rem;
+            margin: 0; color: #fff; text-shadow: 0 0 5px var(--primary-glow), 0 0 15px var(--primary-glow), 0 0 40px var(--secondary-glow);
+        }
+        .hero p { font-size: 1.25rem; max-width: 800px; color: var(--text-muted); line-height: 1.6; }
+        section { padding: 6rem 0; min-height: 100vh; border-bottom: 1px solid var(--border-color); }
+        h2 { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; text-align: center; margin-bottom: 4rem; color: var(--primary-glow); text-shadow: 0 0 10px var(--primary-glow); }
+        
+        /* General Card & Grid Styles */
+        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s ease; }
+        .card:hover { transform: translateY(-10px); }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-glow), transparent); animation: animate-border 4s linear infinite;
+        }
+        @keyframes animate-border { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .card h3 { font-family: 'Orbitron', sans-serif; color: var(--primary-glow); margin-top: 0; }
+        .card ul { list-style-type: '✓ '; padding-left: 20px; }
+        .card li { padding: 5px 0; color: var(--text-muted); }
+        .card li strong { color: var(--text-color); }
+        
+        /* Tiered Architecture Styling */
+        .tier-container { margin-bottom: 5rem; }
+        .tier-header { display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid var(--primary-glow); padding-bottom: 1rem; margin-bottom: 2rem; }
+        .tier-icon { font-size: 2.5rem; color: var(--primary-glow); }
+        .tier-header h3 { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: #fff; margin: 0; }
+        .tier-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; align-items: start; }
+        @media (max-width: 1200px) { .tier-grid { grid-template-columns: 1fr; } }
+        .tier-table { width: 100%; border-collapse: collapse; }
+        .tier-table th, .tier-table td { padding: 1rem; text-align: left; border: 1px solid var(--border-color); vertical-align: top; }
+        .tier-table thead { background-color: var(--card-bg); }
+        .tier-table th { font-family: 'Orbitron', sans-serif; color: var(--primary-glow); }
+        .tier-table td ul { padding-left: 20px; margin: 0; }
+        h4 { font-family: 'Orbitron', sans-serif; color: var(--secondary-glow); font-size: 1.2rem; margin-top: 2rem; margin-bottom: 1rem; }
+        
+        /* System Design Diagram Styles */
+        .system-design { background: #010409; border: 1px solid var(--border-color); padding: 2rem; font-family: monospace; white-space: pre; overflow-x: auto; border-radius: 8px; line-height: 1.5; color: #79c0ff; }
+        .system-design .component { color: #58a6ff; font-weight: bold; }
+        .system-design .service { color: #f778ba; }
+        .system-design .tool { color: #d2a8ff; }
+        .system-design .flow { color: #8b949e; }
+        .system-design .gate { color: #ffab70; font-style: italic; }
+        
+        /* Roadmap Table */
+        .roadmap-table { width: 100%; border-collapse: collapse; margin-top: 2rem; font-size: 0.95rem; }
+        .roadmap-table th, .roadmap-table td { padding: 1.25rem 1rem; text-align: left; border: 1px solid var(--border-color); vertical-align: top; }
+        .roadmap-table thead { background-color: var(--card-bg); }
+        .roadmap-table th { font-family: 'Orbitron', sans-serif; color: var(--primary-glow); }
+        .roadmap-table tbody tr:hover { background-color: #0d1117; }
+        .roadmap-table ul { margin-top: 0; padding-left: 20px; }
+        .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: rgba(0, 191, 255, 0.1); color: var(--primary-glow); border: 1px solid rgba(0, 191, 255, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="grid-background"></div>
+
+    <nav class="side-nav">
+        <a href="#home" class="nav-link active" data-section="home"><i class="fas fa-home"></i><span class="tooltip">Overview</span></a>
+        <a href="#specs" class="nav-link" data-section="specs"><i class="fas fa-cogs"></i><span class="tooltip">Toolchain</span></a>
+        <a href="#system-design" class="nav-link" data-section="system-design"><i class="fas fa-sitemap"></i><span class="tooltip">System Design</span></a>
+        <a href="#architecture-breakdown" class="nav-link" data-section="architecture-breakdown"><i class="fas fa-project-diagram"></i><span class="tooltip">Architecture Details</span></a>
+        <a href="#roadmap" class="nav-link" data-section="roadmap"><i class="fas fa-tasks"></i><span class="tooltip">Technical Roadmap</span></a>
+    </nav>
+
+    <main>
+        <header class="hero" id="home">
+            <h1>AI SDLC Factory</h1>
+            <p>The definitive technical proposal and system design for an autonomous Software Development Life Cycle ecosystem on Google Cloud, engineered for the rigorous demands of the banking sector.</p>
+        </header>
+
+        <section id="specs">
+            <h2>Technical Specifications & Toolchain</h2>
+            <div class="card-container">
+                <div class="card">
+                    <h3>🧠 Intelligence Engine</h3>
+                    <ul>
+                        <li><strong>LLM Provider:</strong> Claude 3.5 Sonnet / Opus</li>
+                        <li><strong>Hosting:</strong> Vertex AI Model Garden (SOC2, PCI-DSS)</li>
+                        <li><strong>Agent Framework:</strong> LangGraph, LangChain & Google ADK</li>
+                        <li><strong>Knowledge Base:</strong> Vertex AI Vector Search (RAG)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🏗️ Compute & Orchestration</h3>
+                    <ul>
+                        <li><strong>App Hosting:</strong> Cloud Run, GKE, Agent Engine & App Engine</li>
+                        <li><strong>State Machine:</strong> Google Agent Development Kit</li>
+                        <li><strong>Messaging Bus:</strong> Pub/Sub & Eventarc</li>
+                        <li><strong>IaC Management:</strong> Terraform (managed by Agents)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🔒 Security & Compliance</h3>
+                    <ul>
+                        <li><strong>Data Perimeter:</strong> VPC Service Controls</li>
+                        <li><strong>Identity & Access:</strong> Workload Identity Federation</li>
+                        <li><strong>Secrets Management:</strong> Google Secret Manager</li>
+                        <li><strong>Deployment Governance:</strong> Binary Authorization & SCC Premium</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="system-design">
+            <h2>Overall System Design</h2>
+            <div class="system-design">
+[Human Operator]
+     <span class="flow">| (Provides High-Level Requirement via UI/API)</span>
+     <span class="flow">v</span>
+[<span class="component">Orchestrator: Meta-Agent (Cloud Run)</span>]
+     <span class="flow">|</span>
+     <span class="flow">|-- 1. Analyzes prompt --> Decomposes task into sub-goals.</span>
+     <span class="flow">|-- 2. Generates Agent Manifest (Defines roles, tools, permissions).</span>
+     <span class="flow">|-- 3. Generates Terraform --></span> [<span class="tool">Cloud Deployment Manager</span>] <span class="flow">-></span> Provisions GCP resources for swarm.
+     <span class="flow">|</span>
+     <span class="flow">v</span>
+[<span class="component">Dynamic Agent Swarm (N x Cloud Run services)</span>] <span class="flow"><--> Inter-agent comms via</span> [<span class="service">Pub/Sub</span>]
+     <span class="flow">|</span>
+     <span class="flow">|---</span> [<span class="component">Architect</span>] <span class="flow">-></span> Designs IaC & microservice topology using [<span class="tool">Vertex AI</span>].
+     <span class="flow">|---</span> [<span class="component">Developer</span>] <span class="flow">-></span> Writes application code, pushes to [<span class="service">Cloud Source Repo</span>].
+     <span class="flow">|---</span> [<span class="component">Data Eng</span>]  <span class="flow">-></span> Creates schema for [<span class="service">Cloud Spanner/SQL</span>].
+     <span class="flow">|---</span> [<span class="component">SecOps</span>]    <span class="flow">-></span> Defines IAM policies & vulnerability tests.
+     <span class="flow">|</span>
+     <span class="flow">v</span>
+[<span class="gate">CI/CD Pipeline (Cloud Build)</span>] <span class="flow">-- Triggered by commit</span>
+     <span class="flow">|</span>
+     <span class="flow">|--</span> <span class="gate">Stage 1: Static Code Analysis (SAST)</span>
+     <span class="flow">|--</span> <span class="gate">Stage 2: Build & Unit/Integration Tests</span>
+     <span class="flow">|--</span> <span class="gate">Stage 3: Vulnerability Scanning</span> -> [<span class="service">Artifact Analysis</span>] & [<span class="service">Security Command Center</span>]
+     <span class="flow">|</span>
+     <span class="flow">v</span>
+[<span class="gate">Binary Authorization Attestation</span>]
+     <span class="flow">|</span>
+     <span class="flow">|--</span> <span class="gate">IF FAILED:</span> Pub/Sub message w/ error log sent back to [<span class="component">Developer Agent</span>] for auto-remediation. <span class="flow"><-- (Self-Correction Loop)</span>
+     <span class="flow">|</span>
+     <span class="flow">`--</span> <span class="gate">IF PASSED:</span> Cryptographic signature is created.
+     <span class="flow">v</span>
+[<span class="service">Cloud Deploy</span>] <span class="flow">-- Verifies signature and rolls out to Production.</span>
+     <span class="flow">|</span>
+     <span class="flow">v</span>
+[Final Application on <span class="service">GKE</span> / <span class="service">Cloud Run</span>] <span class="flow"><--> Monitored by</span> [<span class="component">SRE Agent</span>]
+            </div>
+        </section>
+
+        <section id="architecture-breakdown">
+            <h2>Detailed Architectural Breakdowns</h2>
+            <!-- TIER 1: SIMPLE -->
+            <div class="tier-container">
+                <div class="tier-header">
+                    <i class="fas fa-drafting-compass tier-icon"></i>
+                    <h3>Level 1: Simple Architecture</h3>
+                </div>
+                <p><strong>Use Case:</strong> Public Interest Rate & Mortgage Calculator. A read-only application to prove the core pipeline automation.</p>
+                <div class="tier-grid">
+                    <div>
+                        <h4>System Design: Level 1</h4>
+                        <div class="system-design">
+[<span class="component">PM Agent</span>] -> [User Prompt]
+     <span class="flow">| (Generates Spec)</span>
+     <span class="flow">v</span>
+[<span class="component">Developer Agent</span>]
+     <span class="flow">| 1. Reads Spec</span>
+     <span class="flow">| 2. Pulls "Web Archetype"</span>
+     <span class="flow">| 3. Writes code</span>
+     <span class="flow">v</span>
+[<span class="service">Cloud Source Repo</span>]
+     <span class="flow">| (Triggers on commit)</span>
+     <span class="flow">v</span>
+[<span class="gate">CI Pipeline (Cloud Build)</span>]
+     <span class="flow">| 1. Build Container</span>
+     <span class="flow">| 2. Run Unit Tests</span>
+     <span class="flow">v</span>
+[<span class="service">Cloud Run</span>] <- Deploys
+                        </div>
+                        <h4>Key Quality & Security Gate</h4>
+                        <p><strong>Automated CI/CD Pipeline.</strong> The primary goal here is to eliminate manual builds and deployments. Every line of code written by the AI Agent is automatically built and tested, ensuring foundational consistency and repeatability.</p>
+                    </div>
+                    <div>
+                        <h4>Technical Component Breakdown</h4>
+                        <table class="tier-table">
+                            <thead><tr><th>Component</th><th>GCP Tool</th><th>Rationale / Role in this Architecture</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Compute</strong></td><td>Cloud Run</td><td>Serverless, cost-effective for stateless apps. Perfect for simple, public-facing tools with variable traffic.</td></tr>
+                                <tr><td><strong>Database</strong></td><td>Cloud SQL</td><td>Standard managed relational database sufficient for non-sensitive, structured data like mortgage rates.</td></tr>
+                                <tr><td><strong>CI/CD</strong></td><td>Cloud Build</td><td>Core of this tier. Automates the build and test process, providing the first layer of quality control.</td></tr>
+                                <tr><td><strong>Source Control</strong></td><td>Cloud Source Repositories</td><td>Secure, private Git repository that natively integrates with Cloud Build to trigger the pipeline.</td></tr>
+                                <tr><td><strong>Agent Hosting</strong></td><td>Cloud Run</td><td>The PM and Developer agents are deployed as simple, static services. They don't change.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIER 2: MEDIUM -->
+            <div class="tier-container">
+                <div class="tier-header">
+                    <i class="fas fa-shield-alt tier-icon"></i>
+                    <h3>Level 2: Medium Architecture</h3>
+                </div>
+                <p><strong>Use Case:</strong> Authenticated Customer Portal (View Account Balances). Introduces PII handling, IAM, and microservices.</p>
+                <div class="tier-grid">
+                    <div>
+                        <h4>System Design: Level 2</h4>
+                        <div class="system-design">
+[<span class="component">Architect Agent</span>] -> [Prompt]
+     <span class="flow">| (Designs microservices)</span>
+     <span class="flow">v</span>
+[<span class="component">Agent Swarm</span>] <span class="flow"><-></span> [<span class="service">Pub/Sub</span>]
+     <span class="flow">|-- Dev A: Auth API</span>
+     <span class="flow">`-- Dev B: Accounts API</span>
+     <span class="flow">v</span>
+[<span class="gate">CI Pipeline (Cloud Build)</span>]
+     <span class="flow">|-- 1. Build & Test</span>
+     <span class="flow">`-- 2. Vuln Scan -></span> [<span class="service">SCC</span>]
+     <span class="flow">v</span>
+[<span class="gate">Binary Authorization Gate</span>]
+     <span class="flow">| (Checks for signature)</span>
+     <span class="flow">v</span>
+[<span class="component">SecOps Agent</span>] -> Attests
+     <span class="flow">|</span>
+     <span class="flow">v</span>
+[<span class="service">Cloud Deploy</span>] -> [<span class="service">GKE</span>]
+                        </div>
+                        <h4>Key Quality & Security Gate</h4>
+                        <p><strong>Binary Authorization.</strong> This is a cryptographic enforcement layer. GCP will physically block a deployment unless the container image has been signed by a trusted authority (the SecOps Agent) after passing all vulnerability scans. It moves from "testing for quality" to "mathematically proving security."</p>
+                    </div>
+                    <div>
+                        <h4>Technical Component Breakdown</h4>
+                        <table class="tier-table">
+                             <thead><tr><th>Component</th><th>GCP Tool</th><th>Rationale / Role in this Architecture</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Identity</strong></td><td>Cloud Identity Platform</td><td>Provides enterprise-grade, secure authentication (including MFA) out-of-the-box, removing the need for agents to write complex auth logic.</td></tr>
+                                <tr><td><strong>Data Security</strong></td><td>CMEK on Cloud SQL</td><td>Customer-Managed Encryption Keys give the bank ultimate control over the keys protecting sensitive PII data, a common regulatory requirement.</td></tr>
+                                <tr><td><strong>Messaging</strong></td><td>Pub/Sub</td><td>Decouples microservices. Allows the Architect Agent to design a system where agents can build and deploy their components independently, increasing speed.</td></tr>
+                                <tr><td><strong>Governance</strong></td><td>Binary Authorization</td><td>The core security primitive of this tier. Provides non-repudiable proof that a workload has been vetted before deployment.</td></tr>
+                                <tr><td><strong>Agents</strong></td><td>Adds Architect & SecOps</td><td>The team becomes more specialized. The Architect plans the multi-service layout, and the SecOps agent acts as the automated security auditor.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIER 3: COMPLEX -->
+            <div class="tier-container">
+                <div class="tier-header">
+                    <i class="fas fa-cogs tier-icon"></i>
+                    <h3>Level 3: Complex Architecture</h3>
+                </div>
+                <p><strong>Use Case:</strong> Core Banking Ledger & Real-Time Fraud Detection. Mission-critical, dynamic swarm generation.</p>
+                <div class="tier-grid">
+                    <div>
+                        <h4>System Design: Level 3</h4>
+                        <div class="system-design">
+[<span class="component">Meta-Agent</span>] -> [Prompt]
+     <span class="flow">| 1. Decomposes Task</span>
+     <span class="flow">| 2. Generates Terraform</span>
+     <span class="flow">v</span>
+[<span class="component">Dynamic Swarm</span>] (N agents)
+     <span class="flow">|-- Data Eng -></span> [<span class="service">Cloud Spanner</span>]
+     <span class="flow">|-- Quant -></span> [<span class="tool">Vertex AI Models</span>]
+     <span class="flow">`-- SRE -></span> [<span class="service">Cloud Monitoring</span>]
+     <span class="flow">v</span>
+[<span class="gate">CI/CD Pipeline</span>]
+     <span class="flow">| (All previous gates)</span>
+     <span class="flow">`-- +</span> <span class="gate">TDAD Enforcement</span>
+     <span class="flow">v</span>
+[<span class="service">GKE</span>] (Production)
+     <span class="flow">^</span>
+     <span class="flow">| (Receives alerts)</span>
+     <span class="flow">|</span>
+[<span class="component">SRE Agent</span>] <span class="flow">-- (Auto-scaling)</span>
+                        </div>
+                        <h4>Key Quality & Security Gate</h4>
+                        <p><strong>Test-Driven Agent Development (TDAD).</strong> At this level, the Meta-Agent *must first generate the complete suite of tests* that define a "correct" outcome. The developer agents are then tasked with a single goal: write code that passes all of those pre-defined tests. This inverts the development model to be outcome-focused and is critical for complex systems.</p>
+                    </div>
+                    <div>
+                        <h4>Technical Component Breakdown</h4>
+                        <table class="tier-table">
+                            <thead><tr><th>Component</th><th>GCP Tool</th><th>Rationale / Role in this Architecture</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Database</strong></td><td>Cloud Spanner</td><td>The only choice for a global, strongly consistent financial ledger. Guarantees zero data loss and transactional integrity at planetary scale.</td></tr>
+                                <tr><td><strong>Compute</strong></td><td>GKE</td><td>Required for orchestrating complex, stateful microservices like a core banking system. Provides fine-grained control over networking and scaling.</td></tr>
+                                <tr><td><strong>ML Platform</strong></td><td>Vertex AI</td><td>Used for both hosting the Claude agents and for training/deploying the custom ML models needed for real-time fraud detection.</td></tr>
+                                <tr><td><strong>Agent Model</strong></td><td>Meta-Agent / Dynamic Swarm</td><td>The factory now builds its own workforce. The Meta-Agent analyzes the task and provisions a custom team of specialists (e.g., a "Quant Agent," "Data Engineer Agent"), making the system adaptable to any complex request.</td></tr>
+                                <tr><td><strong>Monitoring</strong></td><td>Cloud Monitoring & SRE Agent</td><td>The SRE Agent is deployed alongside the application. It subscribes to Cloud Monitoring alerts and is given tools to perform autonomous remediation, such as scaling GKE pods.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap">
+            <h2>Technical Roadmap & Work Breakdown</h2>
+            <table class="roadmap-table">
+                <thead>
+                    <tr>
+                        <th>Phase & Timeline</th>
+                        <th>Objective</th>
+                        <th>Key Technical Tasks (Work Breakdown)</th>
+                        <th>Deliverable / Gate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Phase 0: Foundation</strong><br>(Weeks 1-3)</td>
+                        <td>Establish a secure, compliant, and automated GCP Landing Zone.</td>
+                        <td>
+                            <ul>
+                                <li><strong>Org & Folders:</strong> Set up GCP Organization, folders for Prod/Dev, and projects using IaC (Terraform).</li>
+                                <li><strong>Networking:</strong> Configure Shared VPC, firewall rules, and a VPC Service Controls perimeter.</li>
+                                <li><strong>IAM:</strong> Define IAM custom roles for Admins and Agent Service Accounts (Workload Identity Federation).</li>
+                                <li><strong>Tooling:</strong> Connect Vertex AI to Claude 3.5. Populate Artifact Registry with initial "Archetype" templates.</li>
+                            </ul>
+                        </td>
+                        <td><span class="tag">Security & Compliance Review Sign-off</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 1: Core Orchestration</strong><br>(Weeks 4-6)</td>
+                        <td>Build the "brain" of the factory and the first static agents.</td>
+                        <td>
+                            <ul>
+                                <li><strong>State Machine:</strong> Design and deploy agent orchestration graphs using the Google ADK.</li>
+                                <li><strong>Agents:</strong> Containerize and deploy the static PM, Architect, and Developer agents on Cloud Run.</li>
+                                <li><strong>CI Pipeline:</strong> Create the initial Cloud Build YAML for a simple `build -> test` sequence triggered by Cloud Source Repositories.</li>
+                                <li><strong>End-to-End Test:</strong> Execute a "Level 1" project, proving an agent can write code that is automatically built.</li>
+                            </ul>
+                        </td>
+                        <td><span class="tag">Successful "Level 1" Build in CI</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 2: Quality & Security Gates</strong><br>(Weeks 7-9)</td>
+                        <td>Automate quality control and enforce cryptographic security.</td>
+                        <td>
+                            <ul>
+                                <li><strong>Security Agent:</strong> Deploy the SecOps agent with tools to run SAST scans and review dependencies.</li>
+                                <li><strong>Binary Authorization:</strong> Configure BinAuthz policies. Integrate the SecOps agent to act as an "attestor," signing images that pass scans.</li>
+                                <li><strong>CI/CD Enhancement:</strong> Add stages to Cloud Build for SAST, DAST (Dynamic Analysis), and vulnerability scanning via SCC.</li>
+                                <li><strong>Human-in-the-Loop:</strong> Configure Cloud Deploy to require a manual approval step for production rollouts.</li>
+                            </ul>
+                        </td>
+                        <td><span class="tag">First BinAuthz-Protected Deployment</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 3: The Dynamic Swarm</strong><br>(Weeks 10-12)</td>
+                        <td>Enable the factory to build its own workforce on demand.</td>
+                        <td>
+                            <ul>
+                                <li><strong>Meta-Agent:</strong> Develop and deploy the primary Meta-Agent on Cloud Run, giving it permissions to provision other services.</li>
+                                <li><strong>Dynamic IaC:</strong> Grant the Meta-Agent a tool to generate and apply Terraform to create new agent services on the fly.</li>
+                                <li><strong>SRE Agent:</strong> Build the final SRE Agent with tools to interact with Cloud Monitoring API to analyze metrics and trigger scaling actions.</li>
+                                <li><strong>Full-Scale Test:</strong> Execute a "Level 3" project, verifying the Meta-Agent can spawn a swarm that builds and deploys a complex application.</li>
+                            </ul>
+                        </td>
+                        <td><span class="tag">Production-Ready AI Factory</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('section, header.hero');
+            const navLinks = document.querySelectorAll('.side-nav .nav-link');
+            
+            const navMap = {};
+            navLinks.forEach(link => {
+                const sectionId = link.getAttribute('href').substring(1);
+                navMap[sectionId] = link;
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const intersectingId = entry.target.id;
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                        });
+                        const activeLink = navMap[intersectingId];
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, { root: null, rootMargin: '0px', threshold: 0.5 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
